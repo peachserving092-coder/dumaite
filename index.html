@@ -120,6 +120,7 @@ fieldset.stf legend{font-weight:600;font-size:14px;margin-bottom:6px;padding:0}
 .seg[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .seg:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .st.cat{background:var(--bg);color:var(--ink);border-color:var(--ink)}
+.sect{font:700 18px Unbounded,sans-serif;margin:26px 0 12px}
 .empty{background:var(--surface);border:1.5px dashed var(--line);border-radius:14px;padding:40px 20px;text-align:center;color:var(--muted)}
 .empty p{margin:0 0 16px}
 dialog{border:none;border-radius:16px;padding:0;width:min(640px,calc(100vw - 24px));max-height:calc(100vh - 24px);background:var(--surface);color:var(--ink)}
@@ -214,8 +215,8 @@ const CONFIG = {
 /* ============ СЛОЙ ДАННЫХ ============
    Таблицы: games и tops (см. supabase.sql). Если Supabase не настроен — localStorage.
    У игры есть categories: ['cinema' | 'walking' | 'vn'] (интерактивное кино, симулятор ходьбы, визуальные новеллы).
-   Топы: loved (до 100), hated (до 50), а также cinema_best / walking_best / vn_best (до 25)
-   и cinema_worst / walking_worst / vn_worst (до 10). Везде массивы id игр по порядку. */
+   Топы: loved (до 100), hated (до 50), cat_best (до 25) и cat_worst (до 10): общий топ игр с любой из трёх
+   категорий. Везде массивы id игр по порядку. */
 const sb = (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY && window.supabase)
   ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY) : null;
 const ok = r => { if(r.error) throw new Error(r.error.message); return r.data; };
@@ -299,11 +300,11 @@ const LISTS = {
   loved: {title:'Мои любимые игры', limit:100, opp:'hated'},
   hated: {title:'Мои нелюбимые игры', limit:50, opp:'loved'}
 };
-CATEGORIES.forEach(c => {
-  LISTS[c.id+'_best']  = {title: c.label + ': лучшие',  limit:25, opp:c.id+'_worst', cat:c.id};
-  LISTS[c.id+'_worst'] = {title: c.label + ': худшие', limit:10, opp:c.id+'_best',  cat:c.id};
-});
-const GROUPS = [{id:'main', label:'Общие', keys:['loved','hated']}, ...CATEGORIES.map(c => ({id:c.id, label:c.label, keys:[c.id+'_best', c.id+'_worst']}))];
+// один общий топ на все три категории: в него попадают игры, у которых отмечена хотя бы одна из них
+LISTS.cat_best  = {title:'Топ-25 лучших',  limit:25, opp:'cat_worst', anyCat:true};
+LISTS.cat_worst = {title:'Топ-10 худших', limit:10, opp:'cat_best',  anyCat:true};
+const eligible = (L, g) => !L.anyCat || g.categories.length > 0;
+const GROUPS = [{id:'main', label:'Общие', keys:['loved','hated']}, {id:'cats', label:'Кино, ходьба, новеллы', keys:['cat_best','cat_worst']}];
 let topsGroup = 'main';
 let tops = Object.fromEntries(Object.keys(LISTS).map(k => [k, []]));
 const badges = g => (g.statuses.length || g.categories.length) ? `<div class="sts">${g.categories.map(id => `<span class="st cat">${esc(catLabel(id))}</span>`).join('')}${g.statuses.map(x => `<span class="st" data-s="${esc(x)}">${esc(x)}</span>`).join('')}</div>` : '';
@@ -311,9 +312,13 @@ async function load(){ try {
   games = (await Store.list()).map(norm);
   const t = await Store.getTops(), byId = new Map(games.map(g => [g.id, g]));
   const clean = {}; let changed = false;
+  if(t.cat_best === undefined && t.cat_worst === undefined){   // перенос из старых топов по отдельным категориям
+    const cs = ['cinema','walking','vn'];
+    t.cat_best = cs.flatMap(c => t[c+'_best'] || []); t.cat_worst = cs.flatMap(c => t[c+'_worst'] || []); changed = true;
+  }
   for(const [k, L] of Object.entries(LISTS)){
     const src = t[k] || [];
-    clean[k] = src.filter(id => byId.has(id) && (!L.cat || byId.get(id).categories.includes(L.cat))).slice(0, L.limit);
+    clean[k] = src.filter(id => byId.has(id) && eligible(L, byId.get(id))).slice(0, L.limit);
     if(clean[k].length !== src.length) changed = true;
   }
   if(isOwner && games.length && changed){ try { await Store.saveTops(clean); } catch {} }
@@ -364,7 +369,7 @@ function renderTops(){
   const segs = `<div class="segs" role="group" aria-label="Раздел топов">${GROUPS.map(x => `<button class="seg" data-group="${x.id}" aria-pressed="${x.id === grp.id}">${esc(x.label)}</button>`).join('')}</div>`;
   const panels = grp.keys.map(k => {
     const L = LISTS[k], ids = tops[k], other = tops[L.opp], full = ids.length >= L.limit;
-    const free = games.filter(g => !ids.includes(g.id) && !other.includes(g.id) && (!L.cat || g.categories.includes(L.cat)));
+    const free = games.filter(g => !ids.includes(g.id) && !other.includes(g.id) && eligible(L, g));
     const rows = ids.map((id,i) => { const g = byId.get(id); return `<li${isOwner ? '' : ' class="ro"'}>
       ${isOwner ? `<input class="pos" type="number" min="1" max="${ids.length}" value="${i+1}" data-act="pos" data-k="${k}" data-id="${esc(id)}" aria-label="Позиция: ${esc(g.title)}">` : `<span class="posn">${i+1}</span>`}
       ${g.cover ? `<img class="thumb" src="${esc(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="thumb">${esc(g.title.charAt(0).toUpperCase())}</div>`}
@@ -375,7 +380,7 @@ function renderTops(){
         <button class="ib" data-act="rm" data-k="${k}" data-id="${esc(id)}" aria-label="Убрать из топа">×</button>
       </div>` : ''}</li>`; }).join('');
     const hint = !isOwner ? 'Список пока пуст.'
-      : (L.cat && !games.some(g => g.categories.includes(L.cat))) ? 'Сначала отметь игры этой категорией в их карточках, потом их можно будет добавить сюда.'
+      : (L.anyCat && !games.some(g => g.categories.length)) ? 'Сначала отметь игры категориями (кино, ходьба, новеллы) в их карточках, потом их можно будет добавить сюда.'
       : 'Список пока пуст. Порядок можно менять кнопками или номером позиции.';
     return `<section class="panel"><h2>${esc(L.title)}<span class="cnt">${ids.length} из ${L.limit}</span></h2>
       ${isOwner ? `<div class="addrow"><input class="in" id="add_${k}" list="dl_${k}" placeholder="${full ? 'Список заполнен' : 'Начни вводить название'}" aria-label="Добавить в список: ${esc(L.title)}" ${full ? 'disabled' : ''}>
@@ -385,7 +390,9 @@ function renderTops(){
       ${ids.length ? `<ol class="toplist">${rows}</ol>` : `<p class="muted">${hint}</p>`}
     </section>`;
   });
-  box.innerHTML = segs + '<div class="cols tops">' + panels.join('') + '</div>';
+  const intro = grp.id === 'cats' ? '<p class="muted" style="margin-bottom:14px">Общий топ для игр категорий «Интерактивное кино», «Симулятор ходьбы» и «Визуальные новеллы».</p>' : '';
+  const body = intro + `<div class="cols tops">${panels.join('')}</div>`;
+  box.innerHTML = segs + body;
 }
 async function saveTops(focusId){
   try { await Store.saveTops(tops); } catch(e){ toast('Не удалось сохранить: ' + e.message); }
@@ -399,8 +406,8 @@ $('viewTops').addEventListener('click', async e => {
   const k = b.dataset.k, id = b.dataset.id, act = b.dataset.act, arr = tops[k], L = LISTS[k], i = arr.indexOf(id);
   if(act === 'add'){
     const q = $('add_'+k).value.trim().toLowerCase(); if(!q) return;
-    const g = games.find(x => x.title.toLowerCase() === q && !arr.includes(x.id) && !tops[L.opp].includes(x.id) && (!L.cat || x.categories.includes(L.cat)));
-    if(!g){ $('err_'+k).textContent = (L.cat ? 'Такой игры нет среди игр этой категории' : 'Такой игры нет в журнале') + ', или она уже стоит в одном из двух списков.'; return; }
+    const g = games.find(x => x.title.toLowerCase() === q && !arr.includes(x.id) && !tops[L.opp].includes(x.id) && eligible(L, x));
+    if(!g){ $('err_'+k).textContent = (L.anyCat ? 'Такой игры нет среди игр с категориями' : 'Такой игры нет в журнале') + ', или она уже стоит в одном из двух списков.'; return; }
     if(arr.length >= L.limit){ $('err_'+k).textContent = 'Список заполнен.'; return; }
     arr.push(g.id); return saveTops('add_'+k);
   }
