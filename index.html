@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Мой журнал игр</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ecebf4; --surface:#fff; --ink:#1c1b2f; --muted:#6a6882; --line:#d6d4e6; --accent:#5b3df5; --accent-ink:#fff;
+  --c-game:#5b3df5; --c-story:#e0457b; --c-play:#12a37f; --c-sound:#e89a1c; --c-visual:#1d8fe0;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15141f; --surface:#1f1e2d; --ink:#ecebf7; --muted:#9a98b5; --line:#34324a; --accent:#8b73ff; --accent-ink:#15141f;
+  --c-game:#8b73ff; --c-story:#ff6fa0; --c-play:#3cc9a3; --c-sound:#f5b445; --c-visual:#4db0ff;}}
+:root[data-theme="dark"]{
+  --bg:#15141f; --surface:#1f1e2d; --ink:#ecebf7; --muted:#9a98b5; --line:#34324a; --accent:#8b73ff; --accent-ink:#15141f;
+  --c-game:#8b73ff; --c-story:#ff6fa0; --c-play:#3cc9a3; --c-sound:#f5b445; --c-visual:#4db0ff;}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Onest,system-ui,sans-serif}
+button,input,textarea,select{font:inherit;color:inherit}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 16px 64px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px}
+h1{font:700 clamp(24px,5vw,38px)/1.1 Unbounded,sans-serif;margin:0;letter-spacing:-.02em}
+.btn{border:1.5px solid var(--ink);background:transparent;border-radius:10px;padding:9px 16px;cursor:pointer;font-weight:600}
+.btn:hover{background:var(--ink);color:var(--bg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1);background:var(--accent);color:var(--accent-ink)}
+.btn.danger{border-color:#d33;color:#d33}.btn.danger:hover{background:#d33;color:#fff}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,.card:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.bar input,.bar select{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px}
+.bar input{flex:1;min-width:180px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:14px}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:12px}
+.card:hover{border-color:var(--ink)}
+.card h3{margin:0;font:500 17px/1.25 Unbounded,sans-serif}
+.card .meta{color:var(--muted);font-size:14px}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.total{font:700 26px/1 Unbounded,sans-serif;min-width:56px;text-align:right}
+.total small{display:block;font:500 11px Onest;color:var(--muted);margin-top:4px}
+.bars{display:grid;gap:6px}
+.row{display:grid;grid-template-columns:86px 1fr 28px;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.track{height:8px;border-radius:8px;background:var(--line);overflow:hidden}
+.fill{height:100%;border-radius:8px}
+.row b{color:var(--ink);text-align:right;font-weight:600}
+.cover{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;background:var(--line);display:block}
+.cover.ph{display:grid;place-items:center;font:700 32px Unbounded,sans-serif;color:var(--muted)}
+.card{display:grid;grid-template-columns:104px minmax(0,1fr);gap:14px;align-items:start}
+.card .cover{width:104px}
+.body{display:flex;flex-direction:column;gap:10px;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:6px 8px}
+.chips:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:2px 4px 2px 10px;font-size:14px;font-weight:500;display:inline-flex;gap:4px;align-items:center}
+.chip button{border:0;background:none;cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 4px}
+.chipin{flex:1;min-width:120px;border:0;background:transparent;outline:none;padding:4px}
+.prev{width:160px;height:160px;object-fit:cover}
+.prev[hidden]{display:none}
+.three{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.three{grid-template-columns:1fr}}
+[hidden]{display:none!important}
+.tabs{display:flex;gap:6px;margin-bottom:20px;border-bottom:1.5px solid var(--line)}
+.tab{background:none;border:0;padding:10px 14px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1.5px;border-radius:8px 8px 0 0}
+.tab[aria-current=page]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.sts{display:flex;flex-wrap:wrap;gap:4px}
+.st{font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:20px;padding:1px 9px;color:var(--muted)}
+.st[data-s="Играю"]{color:var(--c-play);border-color:var(--c-play)}
+.st[data-s="Пройдено"]{color:var(--c-visual);border-color:var(--c-visual)}
+.st[data-s="Брошено"]{color:var(--c-story);border-color:var(--c-story)}
+fieldset.stf{border:0;padding:0;margin:0;min-width:0}
+fieldset.stf legend{font-weight:600;font-size:14px;margin-bottom:6px;padding:0}
+.pill{position:relative}
+.pill input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.pill span{display:inline-block;border:1.5px solid var(--line);border-radius:20px;padding:4px 12px;font-size:14px;background:var(--bg)}
+.pill input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pill input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.chk{display:flex;gap:10px;align-items:center;font-weight:600;cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:14px}
+.panel{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:18px}
+.panel h2{margin:0 0 14px;font:500 16px/1.3 Unbounded,sans-serif}
+.kpi b{display:block;font:700 34px/1 Unbounded,sans-serif}
+.kpi span{color:var(--muted);font-size:14px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;margin-bottom:14px}
+.stat .row{grid-template-columns:110px 1fr 36px;font-size:14px}
+.stat .track{height:10px}
+.rank{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.rank li{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:8px}
+.rank li:last-child{border-bottom:0;padding-bottom:0}
+.rank .cnt{color:var(--muted);font-size:13px}
+.rank b{font:700 16px Unbounded,sans-serif;min-width:40px;text-align:right}
+.muted{color:var(--muted);margin:0;font-size:14px}
+.tops{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.panel h2 .cnt{font:500 13px Onest;color:var(--muted);margin-left:6px}
+.addrow{display:flex;gap:8px;margin-bottom:6px}.addrow input{flex:1;min-width:0}
+.toplist{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.toplist li{display:grid;grid-template-columns:52px 44px minmax(0,1fr) auto;gap:10px;align-items:center}
+.pos{width:52px;text-align:center;padding:6px 2px;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;font-weight:600}
+.thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--line);display:grid;place-items:center;font:700 16px Unbounded,sans-serif;color:var(--muted)}
+.tt{min-width:0}.tt b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.tt small{color:var(--muted)}
+.acts{display:flex;gap:4px}
+.ib{border:1.5px solid var(--line);background:none;border-radius:8px;width:30px;height:30px;cursor:pointer;font-weight:700}
+.ib:hover{border-color:var(--ink)}.ib:focus-visible,.pos:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (max-width:520px){.toplist li{grid-template-columns:52px 44px minmax(0,1fr)}.acts{grid-column:2/-1}}
+.auth{margin-left:auto;align-self:center}
+.lg{padding:20px;display:grid;gap:12px}.lg h2{margin:0;font:700 18px Unbounded,sans-serif}
+.vhead{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:start}
+.vhead .cover{width:120px}.vhead h2{margin:0 0 6px}
+.plain{margin:6px 0 0;padding-left:18px;font-weight:400}
+.vrev{white-space:pre-wrap;margin:0;font-weight:400}
+.posn{font:700 15px Unbounded,sans-serif;text-align:center;color:var(--muted)}
+.toplist li.ro{grid-template-columns:36px 44px minmax(0,1fr)}
+.segs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.seg{border:1.5px solid var(--line);background:var(--surface);border-radius:20px;padding:6px 14px;font-weight:600;cursor:pointer}
+.seg[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.st.cat{background:var(--bg);color:var(--ink);border-color:var(--ink)}
+.empty{background:var(--surface);border:1.5px dashed var(--line);border-radius:14px;padding:40px 20px;text-align:center;color:var(--muted)}
+.empty p{margin:0 0 16px}
+dialog{border:none;border-radius:16px;padding:0;width:min(640px,calc(100vw - 24px));max-height:calc(100vh - 24px);background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(10,8,25,.55)}
+form,.formbox{padding:20px 20px 0;display:grid;gap:16px}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.pc{grid-template-columns:1fr}}
+.pc .f{border-left:5px solid var(--c);padding-left:12px}
+.tags{display:flex;gap:10px;font-size:13px;font-weight:600}
+.tags .p{color:var(--c-play)}.tags .m{color:var(--c-story)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:99;max-width:90vw}
+.toast[hidden]{display:none}
+.note{background:var(--surface);border:1.5px solid var(--c-sound);border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:16px}
+.note[hidden]{display:none}
+form h2{margin:0;font:700 20px Unbounded,sans-serif}
+label.f{display:grid;gap:6px;font-weight:600;font-size:14px}
+.in{background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;width:100%}
+textarea.in{resize:vertical;min-height:64px}
+.two{display:grid;grid-template-columns:1fr 120px;gap:12px}
+.crit{border-left:5px solid var(--c);padding-left:14px;display:grid;gap:8px}
+.crit .h{display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.crit .h output{font:700 20px Unbounded,sans-serif;color:var(--c)}
+input[type=range]{width:100%;accent-color:var(--c)}
+.sum{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:12px;padding:12px 16px;font-weight:600}
+.sum output{font:700 24px Unbounded,sans-serif}
+.actions{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;position:sticky;bottom:0;background:var(--surface);padding:14px 0 calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.actions div{display:flex;gap:8px}
+.review{white-space:pre-wrap;color:var(--muted);font-size:14px;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.err{color:#d33;font-size:14px;min-height:1em}
+@media (prefers-reduced-motion:no-preference){.fill{transition:width .3s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Мой журнал игр</h1>
+    <div class="tools" id="tools">
+      <button class="btn" id="exportBtn">Экспорт</button>
+      <button class="btn" id="importBtn">Импорт</button>
+      <button class="btn primary" id="addBtn">Добавить игру</button>
+      <input type="file" id="file" accept="application/json" hidden>
+    </div>
+  </header>
+  <nav class="tabs"><button class="tab" id="tabGames">Игры</button><button class="tab" id="tabStats">Статистика</button><button class="tab" id="tabTops">Мои топы</button><button class="btn auth" id="authBtn" hidden>Войти</button></nav>
+  <div class="note" id="note" hidden>Браузер не даёт сохранять данные на диск, поэтому оценки живут только до закрытия страницы. Сделай экспорт или подключи свою базу.</div>
+  <div id="viewGames">
+  <div class="bar">
+    <input id="q" type="search" placeholder="Найти игру" aria-label="Поиск по названию">
+    <select id="fStatus" aria-label="Статус"></select>
+    <select id="fCat" aria-label="Категория"></select>
+    <select id="fStudio" aria-label="Студия"></select>
+    <select id="fFranchise" aria-label="Франшиза"></select>
+    <select id="sort" aria-label="Сортировка">
+      <option value="new">Сначала добавленные</option>
+      <option value="total">По оценке игры</option>
+      <option value="title">По названию</option>
+      <option value="yearDesc">По году: новые сверху</option>
+      <option value="yearAsc">По году: старые сверху</option>
+      <option value="studio">По студии</option>
+      <option value="franchise">По франшизе</option>
+    </select>
+  </div>
+  <main id="list" class="grid"></main>
+  </div>
+  <div id="viewStats" hidden></div>
+  <div id="viewTops" hidden></div>
+</div>
+
+<datalist id="dlStudio"></datalist><datalist id="dlFranchise"></datalist>
+<dialog id="loginDlg"><div class="lg">
+  <h2>Вход владельца</h2>
+  <label class="f">Пароль<input class="in" id="lgPass" type="password" autocomplete="current-password"></label>
+  <div class="err" id="lgErr" role="alert"></div>
+  <div class="actions" style="padding-bottom:0;border:0;position:static"><div></div><div><button type="button" class="btn" id="lgCancel">Отмена</button><button type="button" class="btn primary" id="lgGo">Войти</button></div></div>
+</div></dialog>
+<dialog id="dlg"><div id="form" class="formbox"></div></dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ============ НАСТРОЙКИ ============
+   Заполни три значения (SQL для базы — в файле supabase.sql).
+   Пока SUPABASE_URL пустой, сайт работает локально (localStorage) и редактирование открыто всем.
+   anon-ключ публичный, так и задумано: запись защищена правилами доступа (RLS) в базе.
+   Пароль в код НЕ вписывай: он задаётся в Supabase (Authentication → Users). */
+const CONFIG = {
+  SUPABASE_URL: '',        // например https://abcdxyz.supabase.co
+  SUPABASE_ANON_KEY: '',   // Project Settings → API → anon public
+  OWNER_EMAIL: ''          // email владельца (тот же, что в Supabase Users и в supabase.sql)
+};
+
+/* ============ СЛОЙ ДАННЫХ ============
+   Таблицы: games и tops (см. supabase.sql). Если Supabase не настроен — localStorage.
+   У игры есть categories: ['cinema' | 'walking' | 'vn'] (интерактивное кино, симулятор ходьбы, визуальные новеллы).
+   Топы: loved (до 100), hated (до 50), а также cinema_best / walking_best / vn_best (до 25)
+   и cinema_worst / walking_worst / vn_worst (до 10). Везде массивы id игр по порядку. */
+const sb = (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY && window.supabase)
+  ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY) : null;
+const ok = r => { if(r.error) throw new Error(r.error.message); return r.data; };
+const fromRow = r => ({
+  id: r.id, title: r.title, year: r.year ?? '', studios: r.studios || [], franchises: r.franchises || [],
+  statuses: r.statuses || [], categories: r.categories || [], cover: r.cover || '', rated: r.rated !== false, ratings: r.ratings || {},
+  pros: r.pros || [], cons: r.cons || [], review: r.review || '', createdAt: Date.parse(r.created_at) || 0
+});
+const toRow = g => ({
+  id: g.id, title: g.title, year: g.year ? Number(g.year) : null, studios: g.studios || [], franchises: g.franchises || [],
+  statuses: g.statuses || [], categories: g.categories || [], cover: g.cover || null, rated: g.rated !== false, ratings: g.ratings || {},
+  pros: g.pros || [], cons: g.cons || [], review: g.review || '', created_at: new Date(g.createdAt || Date.now()).toISOString()
+});
+
+const Store = {
+  KEY: 'game-journal-v1', TKEY: 'game-journal-tops-v1', mem: null, memTops: null,
+  async list(){
+    if(sb) return ok(await sb.from('games').select('*').order('created_at', {ascending:false})).map(fromRow);
+    if(this.mem) return this.mem;
+    try { return JSON.parse(localStorage.getItem(this.KEY) || '[]'); } catch { return this.mem || []; }
+  },
+  async save(game){
+    if(sb){ ok(await sb.from('games').upsert(toRow(game))); return; }
+    const all = await this.list(); const i = all.findIndex(g => g.id === game.id);
+    i >= 0 ? all[i] = game : all.push(game);
+    this._write(all);
+  },
+  async remove(id){
+    if(sb){ ok(await sb.from('games').delete().eq('id', id)); return; }
+    this._write((await this.list()).filter(g => g.id !== id));
+  },
+  async replaceAll(games){
+    if(sb){
+      ok(await sb.from('games').delete().neq('id', ''));
+      for(let i = 0; i < games.length; i += 200) ok(await sb.from('games').insert(games.slice(i, i+200).map(toRow)));
+      return;
+    }
+    this._write(games);
+  },
+  async getTops(){
+    const empty = {loved:[], hated:[]};
+    if(sb){ const d = ok(await sb.from('tops').select('*').eq('id', 1).maybeSingle()); return d ? {...(d.extra || {}), loved:d.loved||[], hated:d.hated||[]} : empty; }
+    if(this.memTops) return this.memTops;
+    try { return JSON.parse(localStorage.getItem(this.TKEY) || 'null') || empty; } catch { return empty; }
+  },
+  async saveTops(t){
+    if(sb){ const {loved, hated, ...extra} = t; ok(await sb.from('tops').upsert({id:1, loved, hated, extra})); return; }
+    this.memTops = t;
+    try { localStorage.setItem(this.TKEY, JSON.stringify(t)); this.memTops = null; }
+    catch { document.getElementById('note').hidden = false; }
+  },
+  _write(all){
+    this.mem = all;
+    try { localStorage.setItem(this.KEY, JSON.stringify(all)); this.mem = null; }
+    catch { document.getElementById('note').hidden = false; }
+  }
+};
+let isOwner = !sb;   // без Supabase — локальный режим, правки открыты
+
+/* ============ КРИТЕРИИ ============ */
+const CRITERIA = [
+  {key:'game',     label:'Игра в целом', color:'var(--c-game)'},
+  {key:'story',    label:'Сюжет',        color:'var(--c-story)'},
+  {key:'gameplay', label:'Геймплей',     color:'var(--c-play)'},
+  {key:'sound',    label:'Саундтрек',    color:'var(--c-sound)'},
+  {key:'visual',   label:'Визуал',       color:'var(--c-visual)'},
+];
+const total = g => Number(g.ratings?.game ?? 0);   // главная оценка — «Игра в целом», не среднее
+const STATUSES = ['Играю','Скорые планы','Дальние планы','Пройдено','Брошено','Отложено','Заморожено'];
+const norm = g => ({...g, statuses: g.statuses || [], categories: g.categories || [], rated: g.rated !== false, studios: g.studios || (g.studio ? [g.studio] : []), franchises: g.franchises || (g.franchise ? [g.franchise] : [])});
+const fmt = n => (Math.round(n * 10) / 10).toFixed(1);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+let games = [];
+const $ = id => document.getElementById(id);
+
+let view = 'games';
+const CATEGORIES = [{id:'cinema', label:'Интерактивное кино'}, {id:'walking', label:'Симулятор ходьбы'}, {id:'vn', label:'Визуальные новеллы'}];
+const catLabel = id => (CATEGORIES.find(c => c.id === id) || {label:id}).label;
+const LISTS = {
+  loved: {title:'Мои любимые игры', limit:100, opp:'hated'},
+  hated: {title:'Мои нелюбимые игры', limit:50, opp:'loved'}
+};
+CATEGORIES.forEach(c => {
+  LISTS[c.id+'_best']  = {title: c.label + ': лучшие',  limit:25, opp:c.id+'_worst', cat:c.id};
+  LISTS[c.id+'_worst'] = {title: c.label + ': худшие', limit:10, opp:c.id+'_best',  cat:c.id};
+});
+const GROUPS = [{id:'main', label:'Общие', keys:['loved','hated']}, ...CATEGORIES.map(c => ({id:c.id, label:c.label, keys:[c.id+'_best', c.id+'_worst']}))];
+let topsGroup = 'main';
+let tops = Object.fromEntries(Object.keys(LISTS).map(k => [k, []]));
+const badges = g => (g.statuses.length || g.categories.length) ? `<div class="sts">${g.categories.map(id => `<span class="st cat">${esc(catLabel(id))}</span>`).join('')}${g.statuses.map(x => `<span class="st" data-s="${esc(x)}">${esc(x)}</span>`).join('')}</div>` : '';
+async function load(){ try {
+  games = (await Store.list()).map(norm);
+  const t = await Store.getTops(), byId = new Map(games.map(g => [g.id, g]));
+  const clean = {}; let changed = false;
+  for(const [k, L] of Object.entries(LISTS)){
+    const src = t[k] || [];
+    clean[k] = src.filter(id => byId.has(id) && (!L.cat || byId.get(id).categories.includes(L.cat))).slice(0, L.limit);
+    if(clean[k].length !== src.length) changed = true;
+  }
+  if(isOwner && games.length && changed){ try { await Store.saveTops(clean); } catch {} }
+  tops = clean;
+  render(); if(view === 'stats') renderStats(); if(view === 'tops') renderTops();
+  } catch(e){ toast('Не удалось загрузить данные: ' + e.message); }
+}
+
+function plural(n, f){ const m = n % 100, d = n % 10; return n + ' ' + (m > 10 && m < 20 ? f[2] : d === 1 ? f[0] : d > 1 && d < 5 ? f[1] : f[2]); }
+function groupAvg(key){
+  const m = new Map();
+  games.filter(g => g.rated).forEach(g => g[key].forEach(name => { const e = m.get(name) || {name, sum:0, n:0}; e.sum += total(g); e.n++; m.set(name, e); }));
+  return [...m.values()].filter(e => e.n >= 3).map(e => ({...e, avg: e.sum / e.n}));
+}
+function renderStats(){
+  const box = $('viewStats'), rated = games.filter(g => g.rated);
+  if(!games.length){ box.innerHTML = '<div class="empty"><p>Статистика появится, когда в журнале будут игры.</p></div>'; return; }
+  const top = (arr, dir) => [...arr].sort((a,b) => dir*(b.avg-a.avg) || b.n-a.n || a.name.localeCompare(b.name,'ru')).slice(0,5);
+  const rank = (title, arr, noun) => `<section class="panel"><h2>${title}</h2>${arr.length
+    ? `<ol class="rank">${arr.map(e => `<li><span>${esc(e.name)}</span><span class="cnt">${plural(e.n, ['игра','игры','игр'])}</span><b>${fmt(e.avg)}</b></li>`).join('')}</ol>`
+    : `<p class="muted">Пока пусто: нужно минимум 3 оценённые игры у одной ${noun}.</p>`}</section>`;
+  const studios = groupAvg('studios'), fr = groupAvg('franchises');
+  const avgRows = rated.length ? CRITERIA.map(c => {
+    const v = rated.reduce((s,g) => s + Number(g.ratings?.[c.key] ?? 0), 0) / rated.length;
+    return `<div class="row"><span>${c.label}</span><div class="track"><div class="fill" style="width:${v*10}%;background:${c.color}"></div></div><b>${fmt(v)}</b></div>`;
+  }).join('') : '<p class="muted">Нет оценённых игр.</p>';
+  const stCounts = STATUSES.map(x => ({x, n: games.filter(g => g.statuses.includes(x)).length}));
+  box.innerHTML = `
+    <div class="kpis">
+      <div class="panel kpi"><b>${rated.length}</b><span>оценено</span></div>
+    </div>
+    <div class="cols">
+      <section class="panel stat"><h2>Средняя оценка по критериям</h2><div class="bars" style="gap:10px">${avgRows}</div></section>
+      <section class="panel"><h2>Игры по статусам</h2><div class="sts">${stCounts.map(o => `<span class="st" data-s="${esc(o.x)}">${esc(o.x)}: ${o.n}</span>`).join('')}</div></section>
+    </div>
+    <div class="cols">
+      ${rank('Лучшие студии', top(studios,1), 'студии')}
+      ${rank('Худшие студии', top(studios,-1), 'студии')}
+      ${rank('Лучшие франшизы', top(fr,1), 'франшизы')}
+      ${rank('Худшие франшизы', top(fr,-1), 'франшизы')}
+    </div>
+    <p class="muted">В рейтингах считается средняя оценка «Игра в целом» у студий и франшиз, где есть минимум 3 оценённые игры.</p>`;
+}
+function renderTops(){
+  const box = $('viewTops'), byId = new Map(games.map(g => [g.id, g]));
+  if(!games.length){ box.innerHTML = '<div class="empty"><p>Топы появятся, когда в журнале будут игры.</p></div>'; return; }
+  const grp = GROUPS.find(x => x.id === topsGroup) || GROUPS[0];
+  const segs = `<div class="segs" role="group" aria-label="Раздел топов">${GROUPS.map(x => `<button class="seg" data-group="${x.id}" aria-pressed="${x.id === grp.id}">${esc(x.label)}</button>`).join('')}</div>`;
+  const panels = grp.keys.map(k => {
+    const L = LISTS[k], ids = tops[k], other = tops[L.opp], full = ids.length >= L.limit;
+    const free = games.filter(g => !ids.includes(g.id) && !other.includes(g.id) && (!L.cat || g.categories.includes(L.cat)));
+    const rows = ids.map((id,i) => { const g = byId.get(id); return `<li${isOwner ? '' : ' class="ro"'}>
+      ${isOwner ? `<input class="pos" type="number" min="1" max="${ids.length}" value="${i+1}" data-act="pos" data-k="${k}" data-id="${esc(id)}" aria-label="Позиция: ${esc(g.title)}">` : `<span class="posn">${i+1}</span>`}
+      ${g.cover ? `<img class="thumb" src="${esc(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="thumb">${esc(g.title.charAt(0).toUpperCase())}</div>`}
+      <div class="tt"><b>${esc(g.title)}</b><small>${[g.year, g.rated ? 'оценка ' + fmt(total(g)) : ''].filter(Boolean).join(', ')}</small></div>
+      ${isOwner ? `<div class="acts">
+        <button class="ib" data-act="up" data-k="${k}" data-id="${esc(id)}" aria-label="Выше" ${i===0?'disabled':''}>↑</button>
+        <button class="ib" data-act="down" data-k="${k}" data-id="${esc(id)}" aria-label="Ниже" ${i===ids.length-1?'disabled':''}>↓</button>
+        <button class="ib" data-act="rm" data-k="${k}" data-id="${esc(id)}" aria-label="Убрать из топа">×</button>
+      </div>` : ''}</li>`; }).join('');
+    const hint = !isOwner ? 'Список пока пуст.'
+      : (L.cat && !games.some(g => g.categories.includes(L.cat))) ? 'Сначала отметь игры этой категорией в их карточках, потом их можно будет добавить сюда.'
+      : 'Список пока пуст. Порядок можно менять кнопками или номером позиции.';
+    return `<section class="panel"><h2>${esc(L.title)}<span class="cnt">${ids.length} из ${L.limit}</span></h2>
+      ${isOwner ? `<div class="addrow"><input class="in" id="add_${k}" list="dl_${k}" placeholder="${full ? 'Список заполнен' : 'Начни вводить название'}" aria-label="Добавить в список: ${esc(L.title)}" ${full ? 'disabled' : ''}>
+        <datalist id="dl_${k}">${free.map(g => `<option value="${esc(g.title)}">`).join('')}</datalist>
+        <button class="btn primary" data-act="add" data-k="${k}" ${full ? 'disabled' : ''}>Добавить</button></div>` : ''}
+      <div class="err" id="err_${k}" role="alert"></div>
+      ${ids.length ? `<ol class="toplist">${rows}</ol>` : `<p class="muted">${hint}</p>`}
+    </section>`;
+  });
+  box.innerHTML = segs + '<div class="cols tops">' + panels.join('') + '</div>';
+}
+async function saveTops(focusId){
+  try { await Store.saveTops(tops); } catch(e){ toast('Не удалось сохранить: ' + e.message); }
+  renderTops(); if(focusId && $(focusId)) $(focusId).focus();
+}
+$('viewTops').addEventListener('click', async e => {
+  const sg = e.target.closest('button[data-group]');
+  if(sg){ topsGroup = sg.dataset.group; renderTops(); return; }
+  if(!isOwner) return;
+  const b = e.target.closest('button[data-act]'); if(!b) return;
+  const k = b.dataset.k, id = b.dataset.id, act = b.dataset.act, arr = tops[k], L = LISTS[k], i = arr.indexOf(id);
+  if(act === 'add'){
+    const q = $('add_'+k).value.trim().toLowerCase(); if(!q) return;
+    const g = games.find(x => x.title.toLowerCase() === q && !arr.includes(x.id) && !tops[L.opp].includes(x.id) && (!L.cat || x.categories.includes(L.cat)));
+    if(!g){ $('err_'+k).textContent = (L.cat ? 'Такой игры нет среди игр этой категории' : 'Такой игры нет в журнале') + ', или она уже стоит в одном из двух списков.'; return; }
+    if(arr.length >= L.limit){ $('err_'+k).textContent = 'Список заполнен.'; return; }
+    arr.push(g.id); return saveTops('add_'+k);
+  }
+  if(act === 'up' && i > 0) [arr[i-1], arr[i]] = [arr[i], arr[i-1]];
+  else if(act === 'down' && i >= 0 && i < arr.length-1) [arr[i+1], arr[i]] = [arr[i], arr[i+1]];
+  else if(act === 'rm') arr.splice(i,1);
+  else return;
+  saveTops();
+});
+$('viewTops').addEventListener('change', e => {
+  if(!isOwner) return;
+  const el = e.target; if(el.dataset.act !== 'pos') return;
+  const arr = tops[el.dataset.k], from = arr.indexOf(el.dataset.id);
+  const to = Math.min(Math.max(parseInt(el.value) || 1, 1), arr.length) - 1;
+  arr.splice(to, 0, arr.splice(from,1)[0]); saveTops();
+});
+$('viewTops').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && e.target.id && e.target.id.startsWith('add_')){ e.preventDefault(); e.target.closest('.addrow').querySelector('button').click(); }
+});
+$('viewTops').addEventListener('error', e => {
+  if(e.target.matches && e.target.matches('img.thumb')){ const d = document.createElement('div'); d.className = 'thumb'; d.textContent = '?'; e.target.replaceWith(d); }
+}, true);
+
+function setView(v){
+  view = v;
+  const map = {games:['viewGames','tabGames'], stats:['viewStats','tabStats'], tops:['viewTops','tabTops']};
+  Object.entries(map).forEach(([name,[vw,tab]]) => { $(vw).hidden = name !== v; $(tab).setAttribute('aria-current', name === v ? 'page' : 'false'); });
+  $('tools').hidden = v !== 'games';
+  if(v === 'stats') renderStats(); if(v === 'tops') renderTops();
+  try { history.replaceState(null, '', '#' + v); } catch {}
+}
+
+function fillFilter(id, key, allLabel){   // key: 'studios' | 'franchises'
+  const el = $(id), cur = el.value;
+  const vals = [...new Set(games.flatMap(g => g[key]).filter(Boolean))].sort((x,y) => x.localeCompare(y,'ru'));
+  el.innerHTML = `<option value="">${allLabel}</option>` + vals.map(v => `<option>${esc(v)}</option>`).join('');
+  el.value = vals.includes(cur) ? cur : '';
+  el.hidden = !vals.length;
+}
+const cmpText = key => (a,b) => {
+  const x=(a[key][0]||'').trim(), y=(b[key][0]||'').trim();
+  if(!x && !y) return 0; if(!x) return 1; if(!y) return -1;
+  return x.localeCompare(y,'ru') || a.title.localeCompare(b.title,'ru');
+};
+const yr = g => Number(g.year) || null;
+function cmpYear(dir){ return (a,b) => { const x=yr(a), y=yr(b); if(x===null&&y===null) return 0; if(x===null) return 1; if(y===null) return -1; return dir*(x-y) || a.title.localeCompare(b.title,'ru'); }; }
+
+function render(){
+  fillFilter('fStudio','studios','Все студии'); fillFilter('fFranchise','franchises','Все франшизы');
+  const q = $('q').value.trim().toLowerCase(), sort = $('sort').value, fs = $('fStudio').value, ff = $('fFranchise').value, st = $('fStatus').value, ct = $('fCat').value;
+  let items = games.filter(g =>
+    (!q || [g.title,...g.studios,...g.franchises].some(v => (v||'').toLowerCase().includes(q))) &&
+    (!st || g.statuses.includes(st)) && (!ct || g.categories.includes(ct)) && (!fs || g.studios.includes(fs)) && (!ff || g.franchises.includes(ff)));
+  const sorters = {
+    new:(a,b)=>(b.createdAt||0)-(a.createdAt||0), total:(a,b)=>(b.rated?total(b):-1)-(a.rated?total(a):-1),
+    title:(a,b)=>a.title.localeCompare(b.title,'ru'), yearDesc:cmpYear(-1), yearAsc:cmpYear(1),
+    studio:cmpText('studios'), franchise:cmpText('franchises')
+  };
+  items.sort(sorters[sort]);
+  const list = $('list');
+  if(!games.length){
+    list.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>' + (isOwner ? 'Здесь пока нет игр. Добавь первую и поставь оценки.' : 'Здесь пока нет игр.') + '</p>' + (isOwner ? '<button class="btn primary" id="emptyAdd">Добавить игру</button>' : '') + '</div>';
+    if(isOwner) $('emptyAdd').onclick = () => openForm(); return;
+  }
+  if(!items.length){ list.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>Ничего не найдено.</p></div>'; return; }
+  list.innerHTML = items.map(g => `
+    <button class="card" data-id="${esc(g.id)}">
+      ${g.cover ? `<img class="cover" src="${esc(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="cover ph">${esc(g.title.charAt(0).toUpperCase())}</div>`}
+      <div class="body">
+        <div class="top">
+          <div><h3>${esc(g.title)}</h3><div class="meta">${[g.year, g.studios.join(', ')].filter(Boolean).map(esc).join(', ') || 'Без года и студии'}${g.franchises.length ? `<br>Франшиза: ${esc(g.franchises.join(', '))}` : ''}</div></div>
+          <div class="total">${g.rated ? fmt(total(g)) : '—'}<small>${g.rated ? 'игра' : 'без оценки'}</small></div>
+        </div>
+        ${badges(g)}
+        ${g.rated ? `<div class="bars">${CRITERIA.filter(c => c.key !== 'game').map(c => `
+          <div class="row"><span>${c.label}</span>
+            <div class="track"><div class="fill" style="width:${(g.ratings?.[c.key]??0)*10}%;background:${c.color}"></div></div>
+            <b>${fmt(g.ratings?.[c.key]??0)}</b></div>`).join('')}</div>` : ''}
+        ${(g.pros?.length||g.cons?.length) ? `<div class="tags"><span class="p">+ ${g.pros?.length||0}</span><span class="m">− ${g.cons?.length||0}</span></div>` : ''}
+        ${g.review ? `<p class="review">${esc(g.review)}</p>` : ''}
+      </div>
+    </button>`).join('');
+  list.querySelectorAll('img.cover').forEach(img => img.onerror = () => {
+    const d = document.createElement('div'); d.className = 'cover ph'; d.textContent = (img.closest('.card').querySelector('h3').textContent||'?').charAt(0).toUpperCase(); img.replaceWith(d);
+  });
+  list.querySelectorAll('.card').forEach(el => el.onclick = () => { const g = games.find(x => x.id === el.dataset.id); isOwner ? openForm(g) : openView(g); });
+}
+
+const lines = t => (t||'').split('\n').map(x => x.trim()).filter(Boolean);
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,3000); }
+
+function openView(g){
+  const rows = g.rated ? CRITERIA.map(c => `<div class="row"><span>${c.label}</span><div class="track"><div class="fill" style="width:${(g.ratings?.[c.key]??0)*10}%;background:${c.color}"></div></div><b>${fmt(g.ratings?.[c.key]??0)}</b></div>`).join('') : '<p class="muted">Игра не оценена.</p>';
+  const li = a => a.length ? a.map(x => `<li>${esc(x)}</li>`).join('') : '<li class="muted">—</li>';
+  $('form').innerHTML = `
+    <div class="vhead">
+      ${g.cover ? `<img class="cover" src="${esc(g.cover)}" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cover ph',textContent:'?'}))">` : `<div class="cover ph">${esc(g.title.charAt(0).toUpperCase())}</div>`}
+      <div class="body">
+        <h2>${esc(g.title)}</h2>
+        <div class="meta muted">${[g.year, g.studios.join(', ')].filter(Boolean).map(esc).join(', ')}${g.franchises.length ? `<br>Франшиза: ${esc(g.franchises.join(', '))}` : ''}</div>
+        ${badges(g)}
+        ${g.rated ? `<div class="total" style="text-align:left">${fmt(total(g))}<small>игра в целом</small></div>` : ''}
+      </div>
+    </div>
+    <div class="bars stat" style="gap:10px">${rows}</div>
+    ${(g.pros?.length || g.cons?.length) ? `<div class="pc"><div class="f" style="--c:var(--c-play)">Плюсы<ul class="plain">${li(g.pros||[])}</ul></div><div class="f" style="--c:var(--c-story)">Минусы<ul class="plain">${li(g.cons||[])}</ul></div></div>` : ''}
+    ${g.review ? `<div class="f">Отзыв<p class="vrev">${esc(g.review)}</p></div>` : ''}
+    <div class="actions"><div></div><div><button type="button" class="btn" id="vclose">Закрыть</button></div></div>`;
+  $('vclose').onclick = () => $('dlg').close();
+  $('dlg').showModal();
+}
+
+function makeChips(id, initial, listId, label){
+  const box = $(id); let vals = [...initial];
+  box.innerHTML = `<input class="chipin" list="${listId}" placeholder="Добавить, Enter" aria-label="${label}">`;
+  const inp = box.querySelector('input');
+  const draw = () => {
+    box.querySelectorAll('.chip').forEach(c => c.remove());
+    vals.forEach((v,i) => {
+      const c = document.createElement('span'); c.className = 'chip'; c.textContent = v;
+      const x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label','Убрать ' + v);
+      x.onclick = () => { vals.splice(i,1); draw(); }; c.append(x); box.insertBefore(c, inp);
+    });
+  };
+  const add = () => {
+    inp.value.split(/[,;]/).map(t => t.trim()).filter(Boolean).forEach(t => { if(!vals.some(v => v.toLowerCase() === t.toLowerCase())) vals.push(t); });
+    inp.value = ''; draw();
+  };
+  inp.onkeydown = e => {
+    if(e.key === 'Enter' || e.key === ','){ e.preventDefault(); add(); }
+    else if(e.key === 'Backspace' && !inp.value && vals.length){ vals.pop(); draw(); }
+  };
+  inp.onchange = add; inp.onblur = add; draw();
+  return () => { add(); return vals; };
+}
+
+function openForm(game){
+  const g = game || {id:null,title:'',year:'',statuses:[],categories:[],rated:true,studios:[],franchises:[],review:'',pros:[],cons:[],ratings:{}};
+  const form = $('form');
+  form.innerHTML = `
+    <h2>${game ? 'Оценка игры' : 'Новая игра'}</h2>
+    <div class="two">
+      <label class="f">Название<input class="in" id="f_title" maxlength="120" value="${esc(g.title)}"></label>
+      <label class="f">Год<input class="in" id="f_year" type="number" min="1970" max="2100" value="${esc(g.year)}"></label>
+    </div>
+    <div class="three">
+      <div class="f">Студии<div class="chips" id="ch_studios"></div></div>
+      <div class="f">Франшизы<div class="chips" id="ch_franchises"></div></div>
+    </div>
+    <fieldset class="stf"><legend>Статусы</legend><div class="sts pick">${STATUSES.map(x => `<label class="pill"><input type="checkbox" value="${esc(x)}" ${(g.statuses||[]).includes(x) ? 'checked' : ''}><span>${esc(x)}</span></label>`).join('')}</div></fieldset>
+    <fieldset class="stf"><legend>Категории</legend><div class="sts pickc">${CATEGORIES.map(c => `<label class="pill"><input type="checkbox" value="${c.id}" ${(g.categories||[]).includes(c.id) ? 'checked' : ''}><span>${esc(c.label)}</span></label>`).join('')}</div></fieldset>
+    <label class="f">Ссылка на обложку<input class="in" id="f_cover" type="url" placeholder="https://..." value="${esc(g.cover)}"></label>
+    <img class="cover prev" id="prev" alt="Предпросмотр обложки" hidden referrerpolicy="no-referrer">
+    <label class="chk"><input type="checkbox" id="f_rated" ${g.rated !== false ? 'checked' : ''}>Игра оценена (учитывается в статистике)</label>
+    <div id="ratebox" style="display:grid;gap:16px">
+    ${CRITERIA.map(c => `
+      <div class="crit" style="--c:${c.color}">
+        <div class="h"><label for="r_${c.key}">${c.label}</label><output id="o_${c.key}">${fmt(g.ratings?.[c.key] ?? 5)}</output></div>
+        <input type="range" id="r_${c.key}" min="0" max="10" step="0.5" value="${g.ratings?.[c.key] ?? 5}">
+      </div>`).join('')}
+    </div>
+    <div class="pc">
+      <label class="f" style="--c:var(--c-play)">Плюсы<textarea class="in" id="f_pros" rows="5" placeholder="Каждый плюс с новой строки">${esc((g.pros||[]).join('\n'))}</textarea></label>
+      <label class="f" style="--c:var(--c-story)">Минусы<textarea class="in" id="f_cons" rows="5" placeholder="Каждый минус с новой строки">${esc((g.cons||[]).join('\n'))}</textarea></label>
+    </div>
+    <label class="f">Отзыв<textarea class="in" id="f_review" rows="5" placeholder="Что в итоге думаешь об игре?">${esc(g.review)}</textarea></label>
+    <div class="err" id="err" role="alert"></div>
+    <div class="actions">
+      <div>${game ? '<button type="button" class="btn danger" id="del">Удалить</button>' : ''}</div>
+      <div><button type="button" class="btn" id="cancel">Отмена</button><button type="button" class="btn primary" id="save">Сохранить</button></div>
+    </div>`;
+  const upd = () => CRITERIA.forEach(c => $('o_'+c.key).textContent = fmt(Number($('r_'+c.key).value)));
+  CRITERIA.forEach(c => $('r_'+c.key).oninput = upd); upd();
+  const syncRated = () => $('ratebox').hidden = !$('f_rated').checked; $('f_rated').onchange = syncRated; syncRated();
+  const fillList = (id,key) => $(id).innerHTML = [...new Set(games.flatMap(x => x[key]).filter(Boolean))].map(v => `<option value="${esc(v)}">`).join('');
+  fillList('dlStudio','studios'); fillList('dlFranchise','franchises');
+  const getStudios = makeChips('ch_studios', g.studios || [], 'dlStudio', 'Студия');
+  const getFranchises = makeChips('ch_franchises', g.franchises || [], 'dlFranchise', 'Франшиза');
+  const prev = $('prev'), cov = $('f_cover');
+  const showPrev = () => { const u = cov.value.trim(); if(u){ prev.src = u; } else { prev.hidden = true; prev.removeAttribute('src'); } };
+  prev.onload = () => prev.hidden = false; prev.onerror = () => prev.hidden = true;
+  cov.oninput = showPrev; showPrev();
+  $('cancel').onclick = () => $('dlg').close();
+  if(game){
+    let armed = false;
+    $('del').onclick = async () => {
+      if(!armed){ armed = true; $('del').textContent = 'Точно удалить?'; return; }
+      try { await Store.remove(g.id); $('dlg').close(); await load(); toast('Игра удалена'); }
+      catch(e){ $('err').textContent = 'Не удалось удалить: ' + e.message; }
+    };
+  }
+  $('save').onclick = async () => {
+    const title = $('f_title').value.trim();
+    if(!title){ $('err').textContent = 'Введи название игры.'; $('f_title').focus(); return; }
+    const ratings = {}; CRITERIA.forEach(c => ratings[c.key] = Number($('r_'+c.key).value));
+    const out = {
+      id: g.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+      title, year: $('f_year').value, studios: getStudios(), franchises: getFranchises(), cover: $('f_cover').value.trim(),
+      rated: $('f_rated').checked, statuses: [...document.querySelectorAll('#form .pick input:checked')].map(i => i.value), categories: [...document.querySelectorAll('#form .pickc input:checked')].map(i => i.value),
+      review: $('f_review').value.trim(), pros: lines($('f_pros').value), cons: lines($('f_cons').value),
+      ratings, createdAt: g.createdAt || Date.now()
+    };
+    try { await Store.save(out); $('dlg').close(); await load(); toast('Сохранено'); }
+    catch(e){ $('err').textContent = 'Не удалось сохранить: ' + e.message; }
+  };
+  $('dlg').showModal();
+}
+
+const isOwnerSession = ses => !!ses && !!ses.user && (ses.user.email || '').toLowerCase() === (CONFIG.OWNER_EMAIL || '').toLowerCase();
+function applyAuthUI(){
+  $('authBtn').hidden = !sb; $('authBtn').textContent = isOwner ? 'Выйти' : 'Войти';
+  $('addBtn').hidden = !isOwner; $('importBtn').hidden = !isOwner;
+}
+function setOwner(v){ isOwner = v; applyAuthUI(); render(); if(view === 'stats') renderStats(); if(view === 'tops') renderTops(); }
+async function initAuth(){
+  applyAuthUI();
+  if(!sb) return;
+  try { const {data} = await sb.auth.getSession(); isOwner = isOwnerSession(data.session); } catch { isOwner = false; }
+  applyAuthUI();
+  sb.auth.onAuthStateChange((_e, ses) => { const v = isOwnerSession(ses); if(v !== isOwner) setOwner(v); });
+}
+$('authBtn').onclick = async () => {
+  if(isOwner){ await sb.auth.signOut(); toast('Вы вышли'); return; }
+  $('lgErr').textContent = ''; $('lgPass').value = ''; $('loginDlg').showModal(); $('lgPass').focus();
+};
+async function doLogin(){
+  const pass = $('lgPass').value; if(!pass) return;
+  $('lgGo').disabled = true;
+  const {error} = await sb.auth.signInWithPassword({email: CONFIG.OWNER_EMAIL, password: pass});
+  $('lgGo').disabled = false;
+  if(error){ $('lgErr').textContent = error.status === 400 ? 'Неверный пароль.' : 'Не удалось войти: ' + error.message; return; }
+  $('loginDlg').close(); toast('Режим редактирования включён');
+}
+$('lgGo').onclick = doLogin; $('lgCancel').onclick = () => $('loginDlg').close();
+$('lgPass').onkeydown = e => { if(e.key === 'Enter'){ e.preventDefault(); doLogin(); } };
+
+$('addBtn').onclick = () => { if(isOwner) openForm(); };
+$('q').oninput = render; $('sort').onchange = render; $('fStudio').onchange = render; $('fFranchise').onchange = render;
+$('exportBtn').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify({version:2, games, tops},null,2)], {type:'application/json'}));
+  a.download = 'game-journal.json'; a.click(); URL.revokeObjectURL(a.href);
+};
+$('importBtn').onclick = () => { if(isOwner) $('file').click(); };
+$('file').onchange = async e => {
+  const file = e.target.files[0]; if(!file || !isOwner) return;
+  try {
+    const data = JSON.parse(await file.text());
+    const list = Array.isArray(data) ? data : data.games;
+    if(!Array.isArray(list)) throw new Error('не найден список игр');
+    await Store.replaceAll(list.map(g => ({...norm(g), id: g.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())), createdAt: g.createdAt || Date.now()})));
+    if(!Array.isArray(data) && data.tops) await Store.saveTops(data.tops);
+    await load(); toast('Импортировано игр: ' + list.length);
+  } catch(err){ toast('Не удалось импортировать: ' + err.message); }
+  e.target.value = '';
+};
+$('fStatus').innerHTML = '<option value="">Все статусы</option>' + STATUSES.map(x => `<option>${esc(x)}</option>`).join('');
+$('fStatus').onchange = render; $('fCat').onchange = render;
+$('fCat').innerHTML = '<option value="">Все категории</option>' + CATEGORIES.map(c => `<option value="${c.id}">${esc(c.label)}</option>`).join('');
+$('tabGames').onclick = () => setView('games'); $('tabStats').onclick = () => setView('stats'); $('tabTops').onclick = () => setView('tops');
+setView(['#stats','#tops'].includes(location.hash) ? location.hash.slice(1) : 'games');
+initAuth().catch(() => {}).then(load);
+</script>
+</body>
+</html>
