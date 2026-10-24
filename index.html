@@ -121,6 +121,11 @@ fieldset.stf legend{font-weight:600;font-size:14px;margin-bottom:6px;padding:0}
 .seg:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .st.cat{background:var(--bg);color:var(--ink);border-color:var(--ink)}
 .sect{font:700 18px Unbounded,sans-serif;margin:26px 0 12px}
+.skip{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);font-weight:500;cursor:pointer}
+.skip input{accent-color:var(--c)}
+input[type=range]:disabled{opacity:.35}
+.bar input.yr{flex:0 0 110px;min-width:0;width:110px}
+.rank.yr li{grid-template-columns:1fr auto}
 .empty{background:var(--surface);border:1.5px dashed var(--line);border-radius:14px;padding:40px 20px;text-align:center;color:var(--muted)}
 .empty p{margin:0 0 16px}
 dialog{border:none;border-radius:16px;padding:0;width:min(640px,calc(100vw - 24px));max-height:calc(100vh - 24px);background:var(--surface);color:var(--ink)}
@@ -169,6 +174,8 @@ input[type=range]{width:100%;accent-color:var(--c)}
   <div id="viewGames">
   <div class="bar">
     <input id="q" type="search" placeholder="Найти игру" aria-label="Поиск по названию">
+    <input class="yr" id="yFrom" type="number" placeholder="Год от" aria-label="Год от">
+    <input class="yr" id="yTo" type="number" placeholder="Год до" aria-label="Год до">
     <select id="fStatus" aria-label="Статус"></select>
     <select id="fCat" aria-label="Категория"></select>
     <select id="fStudio" aria-label="Студия"></select>
@@ -176,6 +183,10 @@ input[type=range]{width:100%;accent-color:var(--c)}
     <select id="sort" aria-label="Сортировка">
       <option value="new">Сначала добавленные</option>
       <option value="total">По оценке игры</option>
+      <option value="story">По оценке сюжета</option>
+      <option value="gameplay">По оценке геймплея</option>
+      <option value="sound">По оценке саундтрека</option>
+      <option value="visual">По оценке визуала</option>
       <option value="title">По названию</option>
       <option value="yearDesc">По году: новые сверху</option>
       <option value="yearAsc">По году: старые сверху</option>
@@ -214,6 +225,7 @@ const CONFIG = {
 
 /* ============ СЛОЙ ДАННЫХ ============
    Таблицы: games и tops (см. supabase.sql). Если Supabase не настроен — localStorage.
+   ratings: оценки 0–10; любая из четырёх (story, gameplay, sound, visual) может быть null — критерий не оценён.
    У игры есть categories: ['cinema' | 'walking' | 'vn'] (интерактивное кино, симулятор ходьбы, визуальные новеллы).
    Топы: loved (до 100), hated (до 50), cat_best (до 25) и cat_worst (до 10): общий топ игр с любой из трёх
    категорий. Везде массивы id игр по порядку. */
@@ -285,6 +297,9 @@ const CRITERIA = [
   {key:'visual',   label:'Визуал',       color:'var(--c-visual)'},
 ];
 const total = g => Number(g.ratings?.game ?? 0);   // главная оценка — «Игра в целом», не среднее
+const rv = (g,k) => { const v = g.ratings?.[k]; return (v === null || v === undefined || v === '') ? null : Number(v); };   // null = критерий не оценён
+const critVal = (g,k) => !g.rated ? null : (k === 'game' ? total(g) : rv(g,k));
+const critRow = (g,c) => { const v = rv(g,c.key); return `<div class="row"><span>${c.label}</span><div class="track"><div class="fill" style="width:${(v ?? 0)*10}%;background:${c.color}"></div></div><b>${v === null ? '—' : fmt(v)}</b></div>`; };
 const STATUSES = ['Играю','Скорые планы','Дальние планы','Пройдено','Брошено','Отложено','Заморожено'];
 const norm = g => ({...g, statuses: g.statuses || [], categories: g.categories || [], rated: g.rated !== false, studios: g.studios || (g.studio ? [g.studio] : []), franchises: g.franchises || (g.franchise ? [g.franchise] : [])});
 const fmt = n => (Math.round(n * 10) / 10).toFixed(1);
@@ -293,7 +308,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt
 let games = [];
 const $ = id => document.getElementById(id);
 
-let view = 'games';
+let view = 'games', statCrit = 'story';
 const CATEGORIES = [{id:'cinema', label:'Интерактивное кино'}, {id:'walking', label:'Симулятор ходьбы'}, {id:'vn', label:'Визуальные новеллы'}];
 const catLabel = id => (CATEGORIES.find(c => c.id === id) || {label:id}).label;
 const LISTS = {
@@ -328,24 +343,37 @@ async function load(){ try {
 }
 
 function plural(n, f){ const m = n % 100, d = n % 10; return n + ' ' + (m > 10 && m < 20 ? f[2] : d === 1 ? f[0] : d > 1 && d < 5 ? f[1] : f[2]); }
-function groupAvg(key){
+function groupAvg(key, crit = 'game'){
   const m = new Map();
-  games.filter(g => g.rated).forEach(g => g[key].forEach(name => { const e = m.get(name) || {name, sum:0, n:0}; e.sum += total(g); e.n++; m.set(name, e); }));
+  games.forEach(g => {
+    const v = critVal(g, crit); if(v === null) return;
+    g[key].forEach(name => { const e = m.get(name) || {name, sum:0, n:0}; e.sum += v; e.n++; m.set(name, e); });
+  });
   return [...m.values()].filter(e => e.n >= 3).map(e => ({...e, avg: e.sum / e.n}));
 }
 function renderStats(){
   const box = $('viewStats'), rated = games.filter(g => g.rated);
   if(!games.length){ box.innerHTML = '<div class="empty"><p>Статистика появится, когда в журнале будут игры.</p></div>'; return; }
-  const top = (arr, dir) => [...arr].sort((a,b) => dir*(b.avg-a.avg) || b.n-a.n || a.name.localeCompare(b.name,'ru')).slice(0,5);
-  const rank = (title, arr, noun) => `<section class="panel"><h2>${title}</h2>${arr.length
+  const top = (arr, dir, n = 10) => [...arr].sort((a,b) => dir*(b.avg-a.avg) || b.n-a.n || a.name.localeCompare(b.name,'ru')).slice(0,n);
+  const rank = (title, arr, noun, crit) => `<section class="panel"><h2>${esc(title)}</h2>${arr.length
     ? `<ol class="rank">${arr.map(e => `<li><span>${esc(e.name)}</span><span class="cnt">${plural(e.n, ['игра','игры','игр'])}</span><b>${fmt(e.avg)}</b></li>`).join('')}</ol>`
-    : `<p class="muted">Пока пусто: нужно минимум 3 оценённые игры у одной ${noun}.</p>`}</section>`;
+    : `<p class="muted">Пока пусто: нужно минимум 3 ${crit ? 'игры с оценкой этого критерия' : 'оценённые игры'} у одной ${noun}.</p>`}</section>`;
   const studios = groupAvg('studios'), fr = groupAvg('franchises');
   const avgRows = rated.length ? CRITERIA.map(c => {
-    const v = rated.reduce((s,g) => s + Number(g.ratings?.[c.key] ?? 0), 0) / rated.length;
+    const vals = rated.map(g => critVal(g, c.key)).filter(v => v !== null);
+    if(!vals.length) return `<div class="row"><span>${c.label}</span><div class="track"></div><b>—</b></div>`;
+    const v = vals.reduce((x,y) => x + y, 0) / vals.length;
     return `<div class="row"><span>${c.label}</span><div class="track"><div class="fill" style="width:${v*10}%;background:${c.color}"></div></div><b>${fmt(v)}</b></div>`;
   }).join('') : '<p class="muted">Нет оценённых игр.</p>';
   const stCounts = STATUSES.map(x => ({x, n: games.filter(g => g.statuses.includes(x)).length}));
+  const ym = new Map();
+  rated.forEach(g => { const y = yr(g); if(y === null) return; const e = ym.get(y) || {name:String(y), sum:0, n:0}; e.sum += total(g); e.n++; ym.set(y, e); });
+  const years = [...ym.values()].map(e => ({...e, avg: e.sum / e.n}));
+  const yrank = (title, arr) => `<section class="panel"><h2>${title}</h2>${arr.length
+    ? `<ol class="rank yr">${arr.map(e => `<li><span>${esc(e.name)}</span><b>${fmt(e.avg)}</b></li>`).join('')}</ol>`
+    : '<p class="muted">Пока пусто: у оценённых игр не указан год.</p>'}</section>`;
+  const CT = CRITERIA.filter(c => c.key !== 'game'), cn = CT.find(c => c.key === statCrit) || CT[0];
+  const critSegs = `<div class="segs" role="group" aria-label="Критерий">${CT.map(c => `<button class="seg" data-crit="${c.key}" aria-pressed="${c.key === cn.key}">${c.label}</button>`).join('')}</div>`;
   box.innerHTML = `
     <div class="kpis">
       <div class="panel kpi"><b>${rated.length}</b><span>оценено</span></div>
@@ -360,8 +388,23 @@ function renderStats(){
       ${rank('Лучшие франшизы', top(fr,1), 'франшизы')}
       ${rank('Худшие франшизы', top(fr,-1), 'франшизы')}
     </div>
-    <p class="muted">В рейтингах считается средняя оценка «Игра в целом» у студий и франшиз, где есть минимум 3 оценённые игры.</p>`;
+    <p class="muted">В рейтингах считается средняя оценка «Игра в целом» у студий и франшиз, где есть минимум 3 оценённые игры.</p>
+    <h3 class="sect">Лучшие и худшие годы</h3>
+    <div class="cols">
+      ${yrank('Лучшие годы', top(years,1,5))}
+      ${yrank('Худшие годы', top(years,-1,5))}
+    </div>
+    <h3 class="sect">Топ-10 по критерию</h3>
+    ${critSegs}
+    <div class="cols">
+      ${rank('Студии: ' + cn.label.toLowerCase(), top(groupAvg('studios', cn.key),1), 'студии', cn.key)}
+      ${rank('Франшизы: ' + cn.label.toLowerCase(), top(groupAvg('franchises', cn.key),1), 'франшизы', cn.key)}
+    </div>`;
 }
+$('viewStats').addEventListener('click', e => {
+  const b = e.target.closest('button[data-crit]'); if(!b) return;
+  statCrit = b.dataset.crit; renderStats();
+});
 function renderTops(){
   const box = $('viewTops'), byId = new Map(games.map(g => [g.id, g]));
   if(!games.length){ box.innerHTML = '<div class="empty"><p>Топы появятся, когда в журнале будут игры.</p></div>'; return; }
@@ -453,16 +496,20 @@ const cmpText = key => (a,b) => {
   return x.localeCompare(y,'ru') || a.title.localeCompare(b.title,'ru');
 };
 const yr = g => Number(g.year) || null;
+const cmpCrit = key => (a,b) => {
+  const x = critVal(a,key), y = critVal(b,key), t = a.title.localeCompare(b.title,'ru');
+  if(x === null && y === null) return t; if(x === null) return 1; if(y === null) return -1; return y - x || t;
+};
 function cmpYear(dir){ return (a,b) => { const x=yr(a), y=yr(b); if(x===null&&y===null) return 0; if(x===null) return 1; if(y===null) return -1; return dir*(x-y) || a.title.localeCompare(b.title,'ru'); }; }
 
 function render(){
   fillFilter('fStudio','studios','Все студии'); fillFilter('fFranchise','franchises','Все франшизы');
-  const q = $('q').value.trim().toLowerCase(), sort = $('sort').value, fs = $('fStudio').value, ff = $('fFranchise').value, st = $('fStatus').value, ct = $('fCat').value;
+  const q = $('q').value.trim().toLowerCase(), sort = $('sort').value, fs = $('fStudio').value, ff = $('fFranchise').value, st = $('fStatus').value, ct = $('fCat').value, yf = parseInt($('yFrom').value) || null, yt = parseInt($('yTo').value) || null;
   let items = games.filter(g =>
     (!q || [g.title,...g.studios,...g.franchises].some(v => (v||'').toLowerCase().includes(q))) &&
-    (!st || g.statuses.includes(st)) && (!ct || g.categories.includes(ct)) && (!fs || g.studios.includes(fs)) && (!ff || g.franchises.includes(ff)));
+    (!st || g.statuses.includes(st)) && (!ct || g.categories.includes(ct)) && (!yf || (yr(g) !== null && yr(g) >= yf)) && (!yt || (yr(g) !== null && yr(g) <= yt)) && (!fs || g.studios.includes(fs)) && (!ff || g.franchises.includes(ff)));
   const sorters = {
-    new:(a,b)=>(b.createdAt||0)-(a.createdAt||0), total:(a,b)=>(b.rated?total(b):-1)-(a.rated?total(a):-1),
+    new:(a,b)=>(b.createdAt||0)-(a.createdAt||0), total:cmpCrit('game'), story:cmpCrit('story'), gameplay:cmpCrit('gameplay'), sound:cmpCrit('sound'), visual:cmpCrit('visual'),
     title:(a,b)=>a.title.localeCompare(b.title,'ru'), yearDesc:cmpYear(-1), yearAsc:cmpYear(1),
     studio:cmpText('studios'), franchise:cmpText('franchises')
   };
@@ -482,10 +529,7 @@ function render(){
           <div class="total">${g.rated ? fmt(total(g)) : '—'}<small>${g.rated ? 'игра' : 'без оценки'}</small></div>
         </div>
         ${badges(g)}
-        ${g.rated ? `<div class="bars">${CRITERIA.filter(c => c.key !== 'game').map(c => `
-          <div class="row"><span>${c.label}</span>
-            <div class="track"><div class="fill" style="width:${(g.ratings?.[c.key]??0)*10}%;background:${c.color}"></div></div>
-            <b>${fmt(g.ratings?.[c.key]??0)}</b></div>`).join('')}</div>` : ''}
+        ${g.rated ? `<div class="bars">${CRITERIA.filter(c => c.key !== 'game').map(c => critRow(g,c)).join('')}</div>` : ''}
         ${(g.pros?.length||g.cons?.length) ? `<div class="tags"><span class="p">+ ${g.pros?.length||0}</span><span class="m">− ${g.cons?.length||0}</span></div>` : ''}
         ${g.review ? `<p class="review">${esc(g.review)}</p>` : ''}
       </div>
@@ -500,7 +544,7 @@ const lines = t => (t||'').split('\n').map(x => x.trim()).filter(Boolean);
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,3000); }
 
 function openView(g){
-  const rows = g.rated ? CRITERIA.map(c => `<div class="row"><span>${c.label}</span><div class="track"><div class="fill" style="width:${(g.ratings?.[c.key]??0)*10}%;background:${c.color}"></div></div><b>${fmt(g.ratings?.[c.key]??0)}</b></div>`).join('') : '<p class="muted">Игра не оценена.</p>';
+  const rows = g.rated ? CRITERIA.map(c => critRow(g,c)).join('') : '<p class="muted">Игра не оценена.</p>';
   const li = a => a.length ? a.map(x => `<li>${esc(x)}</li>`).join('') : '<li class="muted">—</li>';
   $('form').innerHTML = `
     <div class="vhead">
@@ -563,11 +607,12 @@ function openForm(game){
     <img class="cover prev" id="prev" alt="Предпросмотр обложки" hidden referrerpolicy="no-referrer">
     <label class="chk"><input type="checkbox" id="f_rated" ${g.rated !== false ? 'checked' : ''}>Игра оценена (учитывается в статистике)</label>
     <div id="ratebox" style="display:grid;gap:16px">
-    ${CRITERIA.map(c => `
+    ${CRITERIA.map(c => { const sk = c.key !== 'game' && g.ratings?.[c.key] === null; const val = rv(g,c.key) ?? 5; return `
       <div class="crit" style="--c:${c.color}">
-        <div class="h"><label for="r_${c.key}">${c.label}</label><output id="o_${c.key}">${fmt(g.ratings?.[c.key] ?? 5)}</output></div>
-        <input type="range" id="r_${c.key}" min="0" max="10" step="0.5" value="${g.ratings?.[c.key] ?? 5}">
-      </div>`).join('')}
+        <div class="h"><label for="r_${c.key}">${c.label}</label><output id="o_${c.key}">${sk ? '—' : fmt(val)}</output></div>
+        <input type="range" id="r_${c.key}" min="0" max="10" step="0.5" value="${val}" ${sk ? 'disabled' : ''}>
+        ${c.key === 'game' ? '' : `<label class="skip"><input type="checkbox" id="s_${c.key}" ${sk ? 'checked' : ''}>Не оценивать</label>`}
+      </div>`; }).join('')}
     </div>
     <div class="pc">
       <label class="f" style="--c:var(--c-play)">Плюсы<textarea class="in" id="f_pros" rows="5" placeholder="Каждый плюс с новой строки">${esc((g.pros||[]).join('\n'))}</textarea></label>
@@ -579,8 +624,8 @@ function openForm(game){
       <div>${game ? '<button type="button" class="btn danger" id="del">Удалить</button>' : ''}</div>
       <div><button type="button" class="btn" id="cancel">Отмена</button><button type="button" class="btn primary" id="save">Сохранить</button></div>
     </div>`;
-  const upd = () => CRITERIA.forEach(c => $('o_'+c.key).textContent = fmt(Number($('r_'+c.key).value)));
-  CRITERIA.forEach(c => $('r_'+c.key).oninput = upd); upd();
+  const upd = () => CRITERIA.forEach(c => { const sk = c.key !== 'game' && $('s_'+c.key).checked; $('r_'+c.key).disabled = sk; $('o_'+c.key).textContent = sk ? '—' : fmt(Number($('r_'+c.key).value)); });
+  CRITERIA.forEach(c => { $('r_'+c.key).oninput = upd; if(c.key !== 'game') $('s_'+c.key).onchange = upd; }); upd();
   const syncRated = () => $('ratebox').hidden = !$('f_rated').checked; $('f_rated').onchange = syncRated; syncRated();
   const fillList = (id,key) => $(id).innerHTML = [...new Set(games.flatMap(x => x[key]).filter(Boolean))].map(v => `<option value="${esc(v)}">`).join('');
   fillList('dlStudio','studios'); fillList('dlFranchise','franchises');
@@ -602,7 +647,7 @@ function openForm(game){
   $('save').onclick = async () => {
     const title = $('f_title').value.trim();
     if(!title){ $('err').textContent = 'Введи название игры.'; $('f_title').focus(); return; }
-    const ratings = {}; CRITERIA.forEach(c => ratings[c.key] = Number($('r_'+c.key).value));
+    const ratings = {}; CRITERIA.forEach(c => ratings[c.key] = (c.key !== 'game' && $('s_'+c.key).checked) ? null : Number($('r_'+c.key).value));
     const out = {
       id: g.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
       title, year: $('f_year').value, studios: getStudios(), franchises: getFranchises(), cover: $('f_cover').value.trim(),
@@ -665,7 +710,7 @@ $('file').onchange = async e => {
   e.target.value = '';
 };
 $('fStatus').innerHTML = '<option value="">Все статусы</option>' + STATUSES.map(x => `<option>${esc(x)}</option>`).join('');
-$('fStatus').onchange = render; $('fCat').onchange = render;
+$('fStatus').onchange = render; $('fCat').onchange = render; $('yFrom').oninput = render; $('yTo').oninput = render;
 $('fCat').innerHTML = '<option value="">Все категории</option>' + CATEGORIES.map(c => `<option value="${c.id}">${esc(c.label)}</option>`).join('');
 $('tabGames').onclick = () => setView('games'); $('tabStats').onclick = () => setView('stats'); $('tabTops').onclick = () => setView('tops');
 setView(['#stats','#tops'].includes(location.hash) ? location.hash.slice(1) : 'games');
