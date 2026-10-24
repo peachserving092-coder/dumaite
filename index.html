@@ -368,10 +368,10 @@ function renderStats(){
   const stCounts = STATUSES.map(x => ({x, n: games.filter(g => g.statuses.includes(x)).length}));
   const ym = new Map();
   rated.forEach(g => { const y = yr(g); if(y === null) return; const e = ym.get(y) || {name:String(y), sum:0, n:0}; e.sum += total(g); e.n++; ym.set(y, e); });
-  const years = [...ym.values()].map(e => ({...e, avg: e.sum / e.n}));
+  const years = [...ym.values()].filter(e => e.n >= 3).map(e => ({...e, avg: e.sum / e.n}));
   const yrank = (title, arr) => `<section class="panel"><h2>${title}</h2>${arr.length
     ? `<ol class="rank yr">${arr.map(e => `<li><span>${esc(e.name)}</span><b>${fmt(e.avg)}</b></li>`).join('')}</ol>`
-    : '<p class="muted">Пока пусто: у оценённых игр не указан год.</p>'}</section>`;
+    : '<p class="muted">Пока пусто: нужно минимум 3 оценённые игры за один год.</p>'}</section>`;
   const CT = CRITERIA.filter(c => c.key !== 'game'), cn = CT.find(c => c.key === statCrit) || CT[0];
   const critSegs = `<div class="segs" role="group" aria-label="Критерий">${CT.map(c => `<button class="seg" data-crit="${c.key}" aria-pressed="${c.key === cn.key}">${c.label}</button>`).join('')}</div>`;
   box.innerHTML = `
