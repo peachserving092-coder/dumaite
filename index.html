@@ -95,7 +95,7 @@ fieldset.stf legend{font-weight:600;font-size:14px;margin-bottom:6px;padding:0}
 .rank .cnt{color:var(--muted);font-size:13px}
 .rank b{font:700 16px Unbounded,sans-serif;min-width:40px;text-align:right}
 .muted{color:var(--muted);margin:0;font-size:14px}
-.tops{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.tops{grid-template-columns:1fr}
 .panel h2 .cnt{font:500 13px Onest;color:var(--muted);margin-left:6px}
 .addrow{display:flex;gap:8px;margin-bottom:6px}.addrow input{flex:1;min-width:0}
 .toplist{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
@@ -126,6 +126,55 @@ fieldset.stf legend{font-weight:600;font-size:14px;margin-bottom:6px;padding:0}
 input[type=range]:disabled{opacity:.35}
 .bar input.yr{flex:0 0 110px;min-width:0;width:110px}
 .rank.yr li{grid-template-columns:1fr auto}
+.tabs{flex-wrap:wrap}
+.btn[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.st.warn{color:#d33;border-color:#d33}
+/* плитки с обложками */
+.tgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 10px;min-height:60px}
+.tile .im{position:absolute;inset:0;border-radius:inherit;overflow:hidden}
+.tgrid .tile{aspect-ratio:auto;overflow:visible;background:none;border-radius:0}
+.tgrid .tile .im{position:relative;inset:auto;aspect-ratio:1/1;border-radius:10px;background:var(--line)}
+.tgrid .tn{position:static;opacity:1;background:none;color:var(--ink);padding:6px 2px 0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:520px){.tgrid{gap:8px 6px}.tgrid .tn{font-size:10.5px;padding-top:4px}.tgrid .rk{min-width:20px;height:20px;font-size:10px;left:3px;top:3px;padding:0 5px}.tgrid .x{width:20px;height:20px;font-size:14px;right:2px;top:2px}}
+.hid{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:-8px 0 16px;font-size:13px;color:var(--muted)}
+.hid button{border:1.5px solid var(--ink);background:none;border-radius:20px;padding:2px 10px;cursor:pointer;font-weight:600;color:var(--ink)}
+.hid button:hover{background:var(--ink);color:var(--bg)}
+.tile{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--line);cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+.tile:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tile img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none}
+.phl{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:6px;gap:2px;pointer-events:none}
+.phl b{font:700 28px Unbounded,sans-serif;color:var(--muted)}
+.phl i{font:500 11px/1.2 Onest,sans-serif;font-style:normal;color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.tn{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 6px;background:linear-gradient(transparent,rgba(0,0,0,.85));color:#fff;font-size:12px;font-weight:600;line-height:1.2;opacity:0;transition:opacity .15s;pointer-events:none}
+@media (hover:hover){.tile:hover .tn,.tile:focus-visible .tn{opacity:1}}
+.rk{position:absolute;left:6px;top:6px;min-width:26px;height:26px;border-radius:13px;padding:0 7px;display:grid;place-items:center;background:rgba(15,14,30,.82);color:#fff;font:700 13px Unbounded,sans-serif;pointer-events:none}
+.tile.r1 .rk{background:#f5c242;color:#1c1b2f}.tile.r2 .rk{background:#cfd3dc;color:#1c1b2f}.tile.r3 .rk{background:#d9915b;color:#1c1b2f}
+.bd{position:absolute;right:3px;bottom:3px;background:rgba(15,14,30,.85);color:#fff;border-radius:6px;padding:0 5px;font:600 11px Onest,sans-serif;pointer-events:none}
+.x{position:absolute;right:4px;top:4px;width:24px;height:24px;border-radius:12px;border:0;background:rgba(15,14,30,.85);color:#fff;font-size:16px;line-height:1;cursor:pointer;opacity:0;padding:0}
+@media (hover:hover){.tile:hover .x,.x:focus-visible{opacity:1}}
+@media (hover:none){.x{opacity:.9}}
+.tile.dragging{display:none}
+.ghost{position:fixed;z-index:300;pointer-events:none;opacity:.92;box-shadow:0 14px 34px rgba(0,0,0,.5);transform:scale(1.06);margin:0;aspect-ratio:auto}
+.ghost .x{display:none}
+.slot{aspect-ratio:1/1;border-radius:10px;border:2px dashed var(--accent);background:rgba(120,100,255,.14)}
+.dz.over{outline:2px dashed var(--accent);outline-offset:3px;border-radius:10px}
+body.dnd{cursor:grabbing;user-select:none;-webkit-user-select:none}
+.addbox{position:relative;margin-bottom:8px}
+.sugg{position:absolute;left:0;right:0;top:100%;z-index:20;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.3);max-height:380px;overflow:auto;margin-top:4px}
+.sg{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:6px 10px;cursor:pointer}
+.sg:hover,.sg:focus-visible{background:var(--bg)}
+.sg img,.sg .sgi{width:38px;height:38px;border-radius:6px;object-fit:cover;background:var(--line);flex:0 0 38px;display:grid;place-items:center;font:700 14px Unbounded,sans-serif;color:var(--muted)}
+.sg small{color:var(--muted);margin-left:auto}
+/* тир-лист */
+.tierrow{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);margin-bottom:8px}
+.tl{flex:0 0 116px;display:grid;place-items:center;text-align:center;padding:8px;font:700 14px/1.15 Unbounded,sans-serif;color:#15141f}
+.tz,.pool{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.tz{flex:1;padding:8px;min-height:84px;min-width:0}
+.pool{min-height:84px}
+.tz .tile,.pool .tile{width:68px;height:68px;flex:0 0 68px;aspect-ratio:auto;border-radius:8px}
+.tz .slot,.pool .slot{width:68px;height:68px;flex:0 0 68px;aspect-ratio:auto}
+.tz .rk{display:none}
+@media (max-width:520px){.tl{flex-basis:84px;font-size:12px}}
 .empty{background:var(--surface);border:1.5px dashed var(--line);border-radius:14px;padding:40px 20px;text-align:center;color:var(--muted)}
 .empty p{margin:0 0 16px}
 dialog{border:none;border-radius:16px;padding:0;width:min(640px,calc(100vw - 24px));max-height:calc(100vh - 24px);background:var(--surface);color:var(--ink)}
@@ -169,17 +218,21 @@ input[type=range]{width:100%;accent-color:var(--c)}
       <input type="file" id="file" accept="application/json" hidden>
     </div>
   </header>
-  <nav class="tabs"><button class="tab" id="tabGames">Игры</button><button class="tab" id="tabStats">Статистика</button><button class="tab" id="tabTops">Мои топы</button><button class="btn auth" id="authBtn" hidden>Войти</button></nav>
+  <nav class="tabs"><button class="tab" id="tabGames">Игры</button><button class="tab" id="tabStats">Статистика</button><button class="tab" id="tabTops">Мои топы</button><button class="tab" id="tabTiers">Тир-лист</button><button class="btn auth" id="authBtn" hidden>Войти</button></nav>
   <div class="note" id="note" hidden>Браузер не даёт сохранять данные на диск, поэтому оценки живут только до закрытия страницы. Сделай экспорт или подключи свою базу.</div>
   <div id="viewGames">
   <div class="bar">
     <input id="q" type="search" placeholder="Найти игру" aria-label="Поиск по названию">
+    <button class="btn" id="revBtn" aria-pressed="false" title="Обратный порядок сортировки">⇅ Наоборот</button>
     <input class="yr" id="yFrom" type="number" placeholder="Год от" aria-label="Год от">
     <input class="yr" id="yTo" type="number" placeholder="Год до" aria-label="Год до">
     <select id="fStatus" aria-label="Статус"></select>
     <select id="fCat" aria-label="Категория"></select>
+    <select id="hideSt" aria-label="Скрыть статус"></select>
     <select id="fStudio" aria-label="Студия"></select>
     <select id="fFranchise" aria-label="Франшиза"></select>
+    <button class="btn" id="missBtn" aria-pressed="false" hidden>⚠ Показать недоработки</button>
+    <select id="fMiss" aria-label="Незаполненные данные" hidden></select>
     <select id="sort" aria-label="Сортировка">
       <option value="new">Сначала добавленные</option>
       <option value="total">По оценке игры</option>
@@ -194,10 +247,12 @@ input[type=range]{width:100%;accent-color:var(--c)}
       <option value="franchise">По франшизе</option>
     </select>
   </div>
+  <div class="hid" id="hiddenChips" hidden></div>
   <main id="list" class="grid"></main>
   </div>
   <div id="viewStats" hidden></div>
   <div id="viewTops" hidden></div>
+  <div id="viewTiers" hidden></div>
 </div>
 
 <datalist id="dlStudio"></datalist><datalist id="dlFranchise"></datalist>
@@ -308,7 +363,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt
 let games = [];
 const $ = id => document.getElementById(id);
 
-let view = 'games', statCrit = 'story';
+let view = 'games', statCrit = 'story', sortRev = false;
 const CATEGORIES = [{id:'cinema', label:'Интерактивное кино'}, {id:'walking', label:'Симулятор ходьбы'}, {id:'vn', label:'Визуальные новеллы'}];
 const catLabel = id => (CATEGORIES.find(c => c.id === id) || {label:id}).label;
 const LISTS = {
@@ -322,6 +377,10 @@ const eligible = (L, g) => !L.anyCat || g.categories.length > 0;
 const GROUPS = [{id:'main', label:'Общие', keys:['loved','hated']}, {id:'cats', label:'Кино, ходьба, новеллы', keys:['cat_best','cat_worst']}];
 let topsGroup = 'main';
 let tops = Object.fromEntries(Object.keys(LISTS).map(k => [k, []]));
+tops.tiers = {};   // тир-лист: { 'название тира': [id игр по порядку] }
+const TIERS = ['Ультимейт 10','10','9,5+','9,5','9,5 -','9','Слабая 9','8,5 (9)','8,5','8,5 -','8(5)','8','на пол ставки 8','7,5','7+','7','6,5+','6,5','6','6(5,5)','5(5,5)','5','4','4(3,5)','3(3,5)','3','2','1'];
+const TIER_DEFAULT = {10:'10', 9.5:'9,5', 9:'9', 8.5:'8,5', 8:'8', 7.5:'7,5', 7:'7', 6.5:'6,5', 6:'6', 5.5:'6(5,5)', 5:'5', 4.5:'5', 4:'4', 3.5:'4(3,5)', 3:'3', 2.5:'3(3,5)', 2:'2', 1.5:'2', 1:'1', 0.5:'1', 0:'1'};
+const tierColor = i => i === 0 ? 'linear-gradient(135deg,#ffd45a,#ff8a3c)' : `hsl(${Math.round((i-1)/(TIERS.length-2)*200)},72%,62%)`;
 const badges = g => (g.statuses.length || g.categories.length) ? `<div class="sts">${g.categories.map(id => `<span class="st cat">${esc(catLabel(id))}</span>`).join('')}${g.statuses.map(x => `<span class="st" data-s="${esc(x)}">${esc(x)}</span>`).join('')}</div>` : '';
 async function load(){ try {
   games = (await Store.list()).map(norm);
@@ -336,9 +395,14 @@ async function load(){ try {
     clean[k] = src.filter(id => byId.has(id) && eligible(L, byId.get(id))).slice(0, L.limit);
     if(clean[k].length !== src.length) changed = true;
   }
+  const seenT = new Set(); clean.tiers = {};
+  for(const label of TIERS){
+    const arr = ((t.tiers || {})[label] || []).filter(id => byId.has(id) && byId.get(id).rated && !seenT.has(id) && seenT.add(id));
+    if(arr.length) clean.tiers[label] = arr;
+  }
   if(isOwner && games.length && changed){ try { await Store.saveTops(clean); } catch {} }
   tops = clean;
-  render(); if(view === 'stats') renderStats(); if(view === 'tops') renderTops();
+  render(); if(view === 'stats') renderStats(); if(view === 'tops') renderTops(); if(view === 'tiers') renderTiers();
   } catch(e){ toast('Не удалось загрузить данные: ' + e.message); }
 }
 
@@ -405,81 +469,251 @@ $('viewStats').addEventListener('click', e => {
   const b = e.target.closest('button[data-crit]'); if(!b) return;
   statCrit = b.dataset.crit; renderStats();
 });
+/* ---------- плитки с обложками ---------- */
+const initial = t => esc((t || '?').charAt(0).toUpperCase());
+const phHTML = title => `<span class="phl"><b>${initial(title)}</b><i>${esc(title)}</i></span>`;
+function tileHTML(g, o = {}){
+  const label = g.title + (o.rank ? ', место ' + o.rank : '');
+  return `<div class="tile${o.rank && o.rank <= 3 ? ' r' + o.rank : ''}" data-id="${esc(g.id)}" tabindex="0" role="button" aria-label="${esc(label)}" title="${esc(g.title)}">
+    <div class="im">${g.cover ? `<img src="${esc(g.cover)}" alt="" draggable="false" loading="lazy" referrerpolicy="no-referrer">` : phHTML(g.title)}</div>
+    ${o.rank ? `<span class="rk">${o.rank}</span>` : ''}${o.badge ? `<span class="bd">${esc(o.badge)}</span>` : ''}
+    <span class="tn">${esc(g.title)}</span>
+    ${o.rm ? `<button class="x" data-act="rm" data-k="${o.rm}" data-id="${esc(g.id)}" aria-label="Убрать из топа: ${esc(g.title)}">×</button>` : ''}</div>`;
+}
+document.addEventListener('error', e => {
+  const im = e.target; if(!im || im.tagName !== 'IMG' || !im.closest) return;
+  const t = im.closest('.tile'); if(!t) return;
+  im.insertAdjacentHTML('afterend', phHTML((t.querySelector('.tn') || {}).textContent || '?')); im.remove();
+}, true);
+const openGame = g => { if(g) isOwner ? openForm(g) : openView(g); };
+
+/* ---------- перетаскивание (мышь и касание) ---------- */
+const DnD = (() => {
+  let st = null, last = 0;
+  function attach(root, cfg){
+    root.addEventListener('pointerdown', e => {
+      if(st || !isOwner || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      const tile = e.target.closest('.tile[data-id]'); if(!tile || e.target.closest('button')) return;
+      const zone = tile.closest('.dz'); if(!zone) return;
+      st = {root, cfg, tile, zone, id: tile.dataset.id, sx: e.clientX, sy: e.clientY, x: e.clientX, y: e.clientY, touch: e.pointerType !== 'mouse', active: false};
+      if(st.touch) st.timer = setTimeout(() => { if(st && !st.active) start(); }, 230);   // на телефоне: удержание
+    });
+    root.addEventListener('contextmenu', e => { if(matchMedia('(pointer:coarse)').matches && e.target.closest('.tile')) e.preventDefault(); });
+  }
+  function start(){
+    st.active = true; clearTimeout(st.timer);
+    const r = st.tile.getBoundingClientRect();
+    st.ox = st.sx - r.left; st.oy = st.sy - r.top;
+    const g = st.tile.cloneNode(true); g.classList.add('ghost'); const sq = st.zone.classList.contains('tgrid'); g.style.width = r.width + 'px'; g.style.height = (sq ? r.width : r.height) + 'px';
+    document.body.appendChild(g); st.ghost = g;
+    st.slot = document.createElement('div'); st.slot.className = 'slot'; if(sq) st.slot.style.height = r.height + 'px';
+    st.tile.after(st.slot); st.tile.classList.add('dragging');
+    document.body.classList.add('dnd');
+    if(navigator.vibrate) { try { navigator.vibrate(12); } catch {} }
+    move(); st.raf = requestAnimationFrame(tick);
+  }
+  function move(){
+    const s = st; s.ghost.style.left = (s.x - s.ox) + 'px'; s.ghost.style.top = (s.y - s.oy) + 'px';
+    let z = null;
+    for(const el of document.elementsFromPoint(s.x, s.y)){ const c = el.closest && el.closest('.dz'); if(c && s.root.contains(c)){ z = c; break; } }
+    if(z && !s.cfg.accept(s.zone.dataset.zone, z.dataset.zone)) z = null;
+    if(z !== s.hover){ if(s.hover) s.hover.classList.remove('over'); s.hover = z; if(z) z.classList.add('over'); }
+    if(!z || z.dataset.zone === 'pool'){ s.slot.remove(); return; }
+    const tiles = [...z.querySelectorAll(':scope > .tile:not(.dragging)')];
+    let idx = tiles.length;
+    for(let i = 0; i < tiles.length; i++){ const r = tiles[i].getBoundingClientRect(); if(s.y < r.top || (s.y <= r.bottom && s.x < r.left + r.width / 2)){ idx = i; break; } }
+    if(idx === tiles.length) z.appendChild(s.slot); else tiles[idx].before(s.slot);
+  }
+  function tick(){
+    if(!st || !st.active) return;
+    const m = 80, y = st.y;
+    if(y < m) window.scrollBy(0, -Math.ceil((m - y) / 5)); else if(y > innerHeight - m) window.scrollBy(0, Math.ceil((y - (innerHeight - m)) / 5));
+    move(); st.raf = requestAnimationFrame(tick);
+  }
+  function cleanup(){
+    const s = st; if(!s) return;
+    clearTimeout(s.timer); cancelAnimationFrame(s.raf);
+    if(s.ghost) s.ghost.remove(); if(s.slot) s.slot.remove();
+    s.tile.classList.remove('dragging'); if(s.hover) s.hover.classList.remove('over');
+    document.body.classList.remove('dnd'); st = null;
+  }
+  function finish(){
+    const s = st; let idx = 0, to = null;
+    if(s.hover){
+      to = s.hover.dataset.zone;
+      if(to !== 'pool'){
+        idx = [...s.hover.children].filter(c => c === s.slot || (c.classList.contains('tile') && !c.classList.contains('dragging'))).indexOf(s.slot);
+        if(idx < 0) idx = 0;
+      }
+    }
+    const from = s.zone.dataset.zone, id = s.id, cfg = s.cfg;
+    cleanup(); last = Date.now();
+    if(to !== null) cfg.onDrop(from, id, to, idx);
+  }
+  window.addEventListener('pointermove', e => {
+    if(!st) return; st.x = e.clientX; st.y = e.clientY;
+    if(!st.active){
+      const d = Math.hypot(st.x - st.sx, st.y - st.sy);
+      if(st.touch){ if(d > 8) cleanup(); } else if(d > 5) start();
+      return;
+    }
+    if(e.cancelable) e.preventDefault();
+  });
+  window.addEventListener('pointerup', () => { if(st) st.active ? finish() : cleanup(); });
+  window.addEventListener('pointercancel', () => { if(st) cleanup(); });
+  document.addEventListener('touchmove', e => { if(st && st.active && e.cancelable) e.preventDefault(); }, {passive:false});
+  return {attach, recentlyDragged: () => Date.now() - last < 350};
+})();
+
+/* ---------- мои топы ---------- */
 function renderTops(){
   const box = $('viewTops'), byId = new Map(games.map(g => [g.id, g]));
   if(!games.length){ box.innerHTML = '<div class="empty"><p>Топы появятся, когда в журнале будут игры.</p></div>'; return; }
   const grp = GROUPS.find(x => x.id === topsGroup) || GROUPS[0];
   const segs = `<div class="segs" role="group" aria-label="Раздел топов">${GROUPS.map(x => `<button class="seg" data-group="${x.id}" aria-pressed="${x.id === grp.id}">${esc(x.label)}</button>`).join('')}</div>`;
+  const intro = grp.id === 'cats' ? '<p class="muted" style="margin-bottom:14px">Общий топ для игр категорий «Интерактивное кино», «Симулятор ходьбы» и «Визуальные новеллы».</p>' : '';
   const panels = grp.keys.map(k => {
-    const L = LISTS[k], ids = tops[k], other = tops[L.opp], full = ids.length >= L.limit;
-    const free = games.filter(g => !ids.includes(g.id) && !other.includes(g.id) && eligible(L, g));
-    const rows = ids.map((id,i) => { const g = byId.get(id); return `<li${isOwner ? '' : ' class="ro"'}>
-      ${isOwner ? `<input class="pos" type="number" min="1" max="${ids.length}" value="${i+1}" data-act="pos" data-k="${k}" data-id="${esc(id)}" aria-label="Позиция: ${esc(g.title)}">` : `<span class="posn">${i+1}</span>`}
-      ${g.cover ? `<img class="thumb" src="${esc(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="thumb">${esc(g.title.charAt(0).toUpperCase())}</div>`}
-      <div class="tt"><b>${esc(g.title)}</b><small>${[g.year, g.rated ? 'оценка ' + fmt(total(g)) : ''].filter(Boolean).join(', ')}</small></div>
-      ${isOwner ? `<div class="acts">
-        <button class="ib" data-act="up" data-k="${k}" data-id="${esc(id)}" aria-label="Выше" ${i===0?'disabled':''}>↑</button>
-        <button class="ib" data-act="down" data-k="${k}" data-id="${esc(id)}" aria-label="Ниже" ${i===ids.length-1?'disabled':''}>↓</button>
-        <button class="ib" data-act="rm" data-k="${k}" data-id="${esc(id)}" aria-label="Убрать из топа">×</button>
-      </div>` : ''}</li>`; }).join('');
+    const L = LISTS[k], ids = tops[k].filter(id => byId.has(id)), full = ids.length >= L.limit;
     const hint = !isOwner ? 'Список пока пуст.'
       : (L.anyCat && !games.some(g => g.categories.length)) ? 'Сначала отметь игры категориями (кино, ходьба, новеллы) в их карточках, потом их можно будет добавить сюда.'
-      : 'Список пока пуст. Порядок можно менять кнопками или номером позиции.';
+      : 'Список пока пуст. Найди игру в поле выше и добавь.';
     return `<section class="panel"><h2>${esc(L.title)}<span class="cnt">${ids.length} из ${L.limit}</span></h2>
-      ${isOwner ? `<div class="addrow"><input class="in" id="add_${k}" list="dl_${k}" placeholder="${full ? 'Список заполнен' : 'Начни вводить название'}" aria-label="Добавить в список: ${esc(L.title)}" ${full ? 'disabled' : ''}>
-        <datalist id="dl_${k}">${free.map(g => `<option value="${esc(g.title)}">`).join('')}</datalist>
-        <button class="btn primary" data-act="add" data-k="${k}" ${full ? 'disabled' : ''}>Добавить</button></div>` : ''}
-      <div class="err" id="err_${k}" role="alert"></div>
-      ${ids.length ? `<ol class="toplist">${rows}</ol>` : `<p class="muted">${hint}</p>`}
+      ${isOwner ? `<div class="addbox"><input class="in" id="add_${k}" data-k="${k}" autocomplete="off" placeholder="${full ? 'Список заполнен' : 'Добавить игру: начни вводить название'}" aria-label="Добавить в список: ${esc(L.title)}" ${full ? 'disabled' : ''}><div class="sugg" id="sg_${k}" hidden></div></div>
+        ${ids.length ? '<p class="muted" style="margin:0 0 12px">Перетаскивай обложки, чтобы менять порядок (на телефоне: задержи палец). Крестик убирает игру из списка.</p>' : ''}` : ''}
+      ${ids.length ? `<div class="tgrid dz" data-zone="${k}">${ids.map((id,i) => tileHTML(byId.get(id), {rank: i+1, rm: isOwner ? k : ''})).join('')}</div>` : `<p class="muted">${hint}</p>`}
     </section>`;
   });
-  const intro = grp.id === 'cats' ? '<p class="muted" style="margin-bottom:14px">Общий топ для игр категорий «Интерактивное кино», «Симулятор ходьбы» и «Визуальные новеллы».</p>' : '';
-  const body = intro + `<div class="cols tops">${panels.join('')}</div>`;
-  box.innerHTML = segs + body;
+  box.innerHTML = segs + intro + `<div class="cols tops">${panels.join('')}</div>`;
 }
-async function saveTops(focusId){
+async function saveTops(sel){
   try { await Store.saveTops(tops); } catch(e){ toast('Не удалось сохранить: ' + e.message); }
-  renderTops(); if(focusId && $(focusId)) $(focusId).focus();
+  renderTops(); if(sel){ const el = document.querySelector(sel); if(el) el.focus(); }
 }
-$('viewTops').addEventListener('click', async e => {
+$('viewTops').addEventListener('click', e => {
   const sg = e.target.closest('button[data-group]');
   if(sg){ topsGroup = sg.dataset.group; renderTops(); return; }
-  if(!isOwner) return;
-  const b = e.target.closest('button[data-act]'); if(!b) return;
-  const k = b.dataset.k, id = b.dataset.id, act = b.dataset.act, arr = tops[k], L = LISTS[k], i = arr.indexOf(id);
-  if(act === 'add'){
-    const q = $('add_'+k).value.trim().toLowerCase(); if(!q) return;
-    const g = games.find(x => x.title.toLowerCase() === q && !arr.includes(x.id) && !tops[L.opp].includes(x.id) && eligible(L, x));
-    if(!g){ $('err_'+k).textContent = (L.anyCat ? 'Такой игры нет среди игр с категориями' : 'Такой игры нет в журнале') + ', или она уже стоит в одном из двух списков.'; return; }
-    if(arr.length >= L.limit){ $('err_'+k).textContent = 'Список заполнен.'; return; }
-    arr.push(g.id); return saveTops('add_'+k);
+  const b = e.target.closest('button[data-act]');
+  if(b){
+    if(!isOwner) return;
+    const k = b.dataset.k, id = b.dataset.id;
+    if(b.dataset.act === 'rm'){ tops[k] = tops[k].filter(x => x !== id); saveTops(); }
+    else if(b.dataset.act === 'add'){
+      if(tops[k].length >= LISTS[k].limit){ toast('Список заполнен'); return; }
+      if(!tops[k].includes(id)) tops[k].push(id);
+      saveTops('#add_' + k);
+    }
+    return;
   }
-  if(act === 'up' && i > 0) [arr[i-1], arr[i]] = [arr[i], arr[i-1]];
-  else if(act === 'down' && i >= 0 && i < arr.length-1) [arr[i+1], arr[i]] = [arr[i], arr[i+1]];
-  else if(act === 'rm') arr.splice(i,1);
-  else return;
-  saveTops();
+  const tile = e.target.closest('.tile[data-id]');
+  if(tile && !DnD.recentlyDragged()) openGame(games.find(g => g.id === tile.dataset.id));
 });
-$('viewTops').addEventListener('change', e => {
-  if(!isOwner) return;
-  const el = e.target; if(el.dataset.act !== 'pos') return;
-  const arr = tops[el.dataset.k], from = arr.indexOf(el.dataset.id);
-  const to = Math.min(Math.max(parseInt(el.value) || 1, 1), arr.length) - 1;
-  arr.splice(to, 0, arr.splice(from,1)[0]); saveTops();
+$('viewTops').addEventListener('input', e => {
+  const inp = e.target; if(!inp.id || !inp.id.startsWith('add_')) return;
+  const k = inp.dataset.k, L = LISTS[k], q = inp.value.trim().toLowerCase(), sg = $('sg_' + k);
+  if(!q){ sg.hidden = true; return; }
+  const found = games.filter(g => !tops[k].includes(g.id) && !tops[L.opp].includes(g.id) && eligible(L, g) && g.title.toLowerCase().includes(q))
+    .sort((a,b) => (b.title.toLowerCase().startsWith(q) - a.title.toLowerCase().startsWith(q)) || a.title.localeCompare(b.title,'ru')).slice(0, 8);
+  sg.innerHTML = found.length
+    ? found.map(g => `<button class="sg" data-act="add" data-k="${k}" data-id="${esc(g.id)}">${g.cover ? `<img src="${esc(g.cover)}" alt="" referrerpolicy="no-referrer">` : `<span class="sgi">${initial(g.title)}</span>`}<span>${esc(g.title)}</span><small>${esc(g.year || '')}</small></button>`).join('')
+    : '<div class="muted" style="padding:10px">Среди подходящих игр ничего не найдено.</div>';
+  sg.hidden = false;
 });
 $('viewTops').addEventListener('keydown', e => {
-  if(e.key === 'Enter' && e.target.id && e.target.id.startsWith('add_')){ e.preventDefault(); e.target.closest('.addrow').querySelector('button').click(); }
+  const inp = e.target;
+  if(inp.id && inp.id.startsWith('add_')){
+    if(e.key === 'Enter'){ e.preventDefault(); const first = $('sg_' + inp.dataset.k).querySelector('button.sg'); if(first) first.click(); }
+    return;
+  }
+  const tile = e.target.closest && e.target.closest('.tile[data-id]'); if(!tile || e.target !== tile) return;
+  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openGame(games.find(g => g.id === tile.dataset.id)); return; }
+  const k = (tile.closest('.dz') || {dataset:{}}).dataset.zone; if(!isOwner || !tops[k]) return;
+  const arr = tops[k], i = arr.indexOf(tile.dataset.id), sel = `.tile[data-id="${CSS.escape(tile.dataset.id)}"]`;
+  if(e.key === 'Delete'){ e.preventDefault(); arr.splice(i, 1); saveTops(); return; }
+  const d = !e.altKey ? 0 : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : 0;
+  if(d && i + d >= 0 && i + d < arr.length){ e.preventDefault(); [arr[i], arr[i+d]] = [arr[i+d], arr[i]]; saveTops(sel); }
 });
-$('viewTops').addEventListener('error', e => {
-  if(e.target.matches && e.target.matches('img.thumb')){ const d = document.createElement('div'); d.className = 'thumb'; d.textContent = '?'; e.target.replaceWith(d); }
-}, true);
+document.addEventListener('click', e => { if(!e.target.closest('.addbox')) document.querySelectorAll('.sugg').forEach(x => x.hidden = true); });
+DnD.attach($('viewTops'), {
+  accept: (from, to) => from === to,
+  onDrop(from, id, to, idx){ const arr = tops[from], i = arr.indexOf(id); if(i < 0) return; arr.splice(i, 1); arr.splice(Math.min(idx, arr.length), 0, id); saveTops(); }
+});
+
+/* ---------- тир-лист ---------- */
+let tierQ = '';
+function defaultTier(g){
+  const v = total(g); if(TIER_DEFAULT[v]) return TIER_DEFAULT[v];
+  const keys = Object.keys(TIER_DEFAULT).map(Number); const near = keys.reduce((a,b) => Math.abs(b - v) < Math.abs(a - v) ? b : a);
+  return TIER_DEFAULT[near];
+}
+function poolGames(){
+  const placed = new Set(Object.values(tops.tiers || {}).flat());
+  return games.filter(g => g.rated && !placed.has(g.id)).sort((a,b) => total(b) - total(a) || a.title.localeCompare(b.title,'ru'));
+}
+const tierTile = g => tileHTML(g, {badge: fmt(total(g))});
+const poolTilesHTML = () => poolGames().filter(g => !tierQ || g.title.toLowerCase().includes(tierQ)).map(tierTile).join('');
+function renderTiers(){
+  const box = $('viewTiers'), rated = games.filter(g => g.rated), byId = new Map(rated.map(g => [g.id, g]));
+  if(!rated.length){ box.innerHTML = '<div class="empty"><p>Тир-лист собирается из оценённых игр. Пока таких нет.</p></div>'; return; }
+  const T = tops.tiers || {};
+  if(!isOwner && !Object.values(T).some(a => a.some(id => byId.has(id)))){ box.innerHTML = '<div class="empty"><p>Тир-лист пока пуст.</p></div>'; return; }
+  const rows = TIERS.map((label, i) => {
+    const ids = (T[label] || []).filter(id => byId.has(id));
+    if(!isOwner && !ids.length) return '';
+    return `<div class="tierrow"><div class="tl" style="background:${tierColor(i)}">${esc(label)}</div><div class="tz dz" data-zone="t:${esc(label)}">${ids.map(id => tierTile(byId.get(id))).join('')}</div></div>`;
+  }).join('');
+  const pool = isOwner ? `<section class="panel" style="margin-top:14px"><h2>Без тира<span class="cnt" id="poolCnt">${poolGames().length}</span></h2>
+    <div class="addrow" style="flex-wrap:wrap"><input class="in" id="poolQ" placeholder="Поиск по названию" value="${esc(tierQ)}" aria-label="Поиск среди игр без тира">
+      <button class="btn" data-act="autotier">Разложить по оценкам</button><button class="btn danger" data-act="resettier">Сбросить тир-лист</button></div>
+    <p class="muted" style="margin:0 0 12px">Оценённые игры попадают сюда сами. Перетащи обложку в нужный тир (на телефоне: задержи палец), вернуть вниз тоже можно.</p>
+    <div class="pool dz" id="poolZone" data-zone="pool">${poolTilesHTML()}</div></section>` : '';
+  box.innerHTML = rows + pool;
+}
+async function saveTiers(){
+  try { await Store.saveTops(tops); } catch(e){ toast('Не удалось сохранить: ' + e.message); }
+  renderTiers();
+}
+$('viewTiers').addEventListener('input', e => {
+  if(e.target.id !== 'poolQ') return;
+  tierQ = e.target.value.trim().toLowerCase(); $('poolZone').innerHTML = poolTilesHTML();
+});
+$('viewTiers').addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]');
+  if(b){
+    if(!isOwner) return;
+    if(b.dataset.act === 'autotier'){
+      tops.tiers = tops.tiers || {};
+      poolGames().forEach(g => { const l = defaultTier(g); (tops.tiers[l] = tops.tiers[l] || []).push(g.id); });
+      saveTiers();
+    } else if(b.dataset.act === 'resettier'){
+      if(!b.dataset.armed){ b.dataset.armed = '1'; b.textContent = 'Точно сбросить?'; return; }
+      tops.tiers = {}; saveTiers();
+    }
+    return;
+  }
+  const tile = e.target.closest('.tile[data-id]');
+  if(tile && !DnD.recentlyDragged()) openGame(games.find(g => g.id === tile.dataset.id));
+});
+$('viewTiers').addEventListener('keydown', e => {
+  const tile = e.target.closest && e.target.closest('.tile[data-id]');
+  if(tile && e.target === tile && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); openGame(games.find(g => g.id === tile.dataset.id)); }
+});
+DnD.attach($('viewTiers'), {
+  accept: () => true,
+  onDrop(from, id, to, idx){
+    const T = tops.tiers = tops.tiers || {}, ok = new Set(games.filter(g => g.rated).map(g => g.id));
+    for(const k of Object.keys(T)) T[k] = T[k].filter(x => x !== id && ok.has(x));
+    if(to.startsWith('t:')){ const label = to.slice(2), arr = T[label] = T[label] || []; arr.splice(Math.min(idx, arr.length), 0, id); }
+    for(const k of Object.keys(T)) if(!T[k].length) delete T[k];
+    saveTiers();
+  }
+});
 
 function setView(v){
   view = v;
-  const map = {games:['viewGames','tabGames'], stats:['viewStats','tabStats'], tops:['viewTops','tabTops']};
+  const map = {games:['viewGames','tabGames'], stats:['viewStats','tabStats'], tops:['viewTops','tabTops'], tiers:['viewTiers','tabTiers']};
   Object.entries(map).forEach(([name,[vw,tab]]) => { $(vw).hidden = name !== v; $(tab).setAttribute('aria-current', name === v ? 'page' : 'false'); });
   $('tools').hidden = v !== 'games';
-  if(v === 'stats') renderStats(); if(v === 'tops') renderTops();
+  if(v === 'stats') renderStats(); if(v === 'tops') renderTops(); if(v === 'tiers') renderTiers();
   try { history.replaceState(null, '', '#' + v); } catch {}
 }
 
@@ -490,28 +724,53 @@ function fillFilter(id, key, allLabel){   // key: 'studios' | 'franchises'
   el.value = vals.includes(cur) ? cur : '';
   el.hidden = !vals.length;
 }
-const cmpText = key => (a,b) => {
+let hiddenSt = new Set();
+try { hiddenSt = new Set(JSON.parse(localStorage.getItem('game-journal-hide') || '[]').filter(x => STATUSES.includes(x))); } catch {}
+const saveHidden = () => { try { localStorage.setItem('game-journal-hide', JSON.stringify([...hiddenSt])); } catch {} };
+// игра скрывается, только если ВСЕ её статусы в списке скрытых (есть ещё другой статус — остаётся)
+const isHiddenBySt = g => hiddenSt.size > 0 && g.statuses.length > 0 && g.statuses.every(x => hiddenSt.has(x));
+function renderHidden(){
+  const sel = $('hideSt');
+  sel.innerHTML = '<option value="">Скрыть статус…</option>' + STATUSES.filter(x => !hiddenSt.has(x)).map(x => `<option>${esc(x)}</option>`).join('');
+  const box = $('hiddenChips');
+  box.hidden = hiddenSt.size === 0;
+  box.innerHTML = hiddenSt.size ? `<span>Скрыты игры только со статусом:</span>${[...hiddenSt].map(x => `<button data-s="${esc(x)}" title="Показать снова">${esc(x)} ✕</button>`).join('')}<span>(скрыто игр: ${games.filter(isHiddenBySt).length})</span>` : '';
+}
+const missing = g => ({cover: !g.cover, year: !yr(g), studio: !g.studios.length});
+const hasMiss = (g, ms) => { const m = missing(g); return ms === 'any' ? (m.cover || m.year || m.studio) : m[ms]; };
+const missBadges = g => { const m = missing(g), a = []; if(m.cover) a.push('нет обложки'); if(m.year) a.push('нет года'); if(m.studio) a.push('нет студии'); return a.length ? `<div class="sts">${a.map(x => `<span class="st warn">${x}</span>`).join('')}</div>` : ''; };
+function fillMiss(){
+  const el = $('fMiss'), cur = el.value, c = {cover:0, year:0, studio:0, any:0};
+  games.forEach(g => { const m = missing(g); if(m.cover) c.cover++; if(m.year) c.year++; if(m.studio) c.studio++; if(m.cover || m.year || m.studio) c.any++; });
+  el.innerHTML = `<option value="">Все игры</option><option value="any">Что-то не заполнено (${c.any})</option><option value="cover">Нет обложки (${c.cover})</option><option value="year">Нет года (${c.year})</option><option value="studio">Нет студии (${c.studio})</option>`;
+  el.value = cur;
+  const on = el.value !== '', b = $('missBtn');
+  b.setAttribute('aria-pressed', String(on));
+  b.textContent = on ? `⚠ Только недоработки (${c.any}) ✕` : `⚠ Показать недоработки (${c.any})`;
+}
+const cmpText = (key, rev) => (a,b) => {
   const x=(a[key][0]||'').trim(), y=(b[key][0]||'').trim();
   if(!x && !y) return 0; if(!x) return 1; if(!y) return -1;
-  return x.localeCompare(y,'ru') || a.title.localeCompare(b.title,'ru');
+  return (rev ? -1 : 1) * x.localeCompare(y,'ru') || a.title.localeCompare(b.title,'ru');
 };
 const yr = g => Number(g.year) || null;
-const cmpCrit = key => (a,b) => {
+const cmpCrit = (key, rev) => (a,b) => {
   const x = critVal(a,key), y = critVal(b,key), t = a.title.localeCompare(b.title,'ru');
-  if(x === null && y === null) return t; if(x === null) return 1; if(y === null) return -1; return y - x || t;
+  if(x === null && y === null) return t; if(x === null) return 1; if(y === null) return -1; return (rev ? x - y : y - x) || t;
 };
 function cmpYear(dir){ return (a,b) => { const x=yr(a), y=yr(b); if(x===null&&y===null) return 0; if(x===null) return 1; if(y===null) return -1; return dir*(x-y) || a.title.localeCompare(b.title,'ru'); }; }
 
 function render(){
-  fillFilter('fStudio','studios','Все студии'); fillFilter('fFranchise','franchises','Все франшизы');
-  const q = $('q').value.trim().toLowerCase(), sort = $('sort').value, fs = $('fStudio').value, ff = $('fFranchise').value, st = $('fStatus').value, ct = $('fCat').value, yf = parseInt($('yFrom').value) || null, yt = parseInt($('yTo').value) || null;
+  renderHidden(); fillMiss(); fillFilter('fStudio','studios','Все студии'); fillFilter('fFranchise','franchises','Все франшизы');
+  const q = $('q').value.trim().toLowerCase(), sort = $('sort').value, fs = $('fStudio').value, ff = $('fFranchise').value, st = $('fStatus').value, ct = $('fCat').value, yf = parseInt($('yFrom').value) || null, yt = parseInt($('yTo').value) || null, ms = isOwner ? $('fMiss').value : '';
   let items = games.filter(g =>
     (!q || [g.title,...g.studios,...g.franchises].some(v => (v||'').toLowerCase().includes(q))) &&
-    (!st || g.statuses.includes(st)) && (!ct || g.categories.includes(ct)) && (!yf || (yr(g) !== null && yr(g) >= yf)) && (!yt || (yr(g) !== null && yr(g) <= yt)) && (!fs || g.studios.includes(fs)) && (!ff || g.franchises.includes(ff)));
+    (!st || g.statuses.includes(st)) && (!ct || g.categories.includes(ct)) && (!yf || (yr(g) !== null && yr(g) >= yf)) && (!yt || (yr(g) !== null && yr(g) <= yt)) && (!fs || g.studios.includes(fs)) && (!ff || g.franchises.includes(ff)) && (!ms || hasMiss(g, ms)) && !isHiddenBySt(g));
   const sorters = {
-    new:(a,b)=>(b.createdAt||0)-(a.createdAt||0), total:cmpCrit('game'), story:cmpCrit('story'), gameplay:cmpCrit('gameplay'), sound:cmpCrit('sound'), visual:cmpCrit('visual'),
-    title:(a,b)=>a.title.localeCompare(b.title,'ru'), yearDesc:cmpYear(-1), yearAsc:cmpYear(1),
-    studio:cmpText('studios'), franchise:cmpText('franchises')
+    new:(a,b)=> sortRev ? (a.createdAt||0)-(b.createdAt||0) : (b.createdAt||0)-(a.createdAt||0),
+    total:cmpCrit('game',sortRev), story:cmpCrit('story',sortRev), gameplay:cmpCrit('gameplay',sortRev), sound:cmpCrit('sound',sortRev), visual:cmpCrit('visual',sortRev),
+    title:(a,b)=>(sortRev ? -1 : 1) * a.title.localeCompare(b.title,'ru'), yearDesc:cmpYear(sortRev ? 1 : -1), yearAsc:cmpYear(sortRev ? -1 : 1),
+    studio:cmpText('studios',sortRev), franchise:cmpText('franchises',sortRev)
   };
   items.sort(sorters[sort]);
   const list = $('list');
@@ -529,6 +788,7 @@ function render(){
           <div class="total">${g.rated ? fmt(total(g)) : '—'}<small>${g.rated ? 'игра' : 'без оценки'}</small></div>
         </div>
         ${badges(g)}
+        ${isOwner ? missBadges(g) : ''}
         ${g.rated ? `<div class="bars">${CRITERIA.filter(c => c.key !== 'game').map(c => critRow(g,c)).join('')}</div>` : ''}
         ${(g.pros?.length||g.cons?.length) ? `<div class="tags"><span class="p">+ ${g.pros?.length||0}</span><span class="m">− ${g.cons?.length||0}</span></div>` : ''}
         ${g.review ? `<p class="review">${esc(g.review)}</p>` : ''}
@@ -664,9 +924,9 @@ function openForm(game){
 const isOwnerSession = ses => !!ses && !!ses.user && (ses.user.email || '').toLowerCase() === (CONFIG.OWNER_EMAIL || '').toLowerCase();
 function applyAuthUI(){
   $('authBtn').hidden = !sb; $('authBtn').textContent = isOwner ? 'Выйти' : 'Войти';
-  $('addBtn').hidden = !isOwner; $('importBtn').hidden = !isOwner;
+  $('addBtn').hidden = !isOwner; $('importBtn').hidden = !isOwner; $('fMiss').hidden = !isOwner; $('missBtn').hidden = !isOwner; if(!isOwner) $('fMiss').value = '';
 }
-function setOwner(v){ isOwner = v; applyAuthUI(); render(); if(view === 'stats') renderStats(); if(view === 'tops') renderTops(); }
+function setOwner(v){ isOwner = v; applyAuthUI(); render(); if(view === 'stats') renderStats(); if(view === 'tops') renderTops(); if(view === 'tiers') renderTiers(); }
 async function initAuth(){
   applyAuthUI();
   if(!sb) return;
@@ -710,10 +970,14 @@ $('file').onchange = async e => {
   e.target.value = '';
 };
 $('fStatus').innerHTML = '<option value="">Все статусы</option>' + STATUSES.map(x => `<option>${esc(x)}</option>`).join('');
-$('fStatus').onchange = render; $('fCat').onchange = render; $('yFrom').oninput = render; $('yTo').oninput = render;
+$('fStatus').onchange = render; $('fCat').onchange = render; $('fMiss').onchange = render;
+$('hideSt').onchange = () => { const v = $('hideSt').value; if(v){ hiddenSt.add(v); saveHidden(); } render(); };
+$('hiddenChips').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if(b){ hiddenSt.delete(b.dataset.s); saveHidden(); render(); } });
+$('missBtn').onclick = () => { $('fMiss').value = $('fMiss').value ? '' : 'any'; render(); };
+$('revBtn').onclick = () => { sortRev = !sortRev; $('revBtn').setAttribute('aria-pressed', String(sortRev)); render(); }; $('yFrom').oninput = render; $('yTo').oninput = render;
 $('fCat').innerHTML = '<option value="">Все категории</option>' + CATEGORIES.map(c => `<option value="${c.id}">${esc(c.label)}</option>`).join('');
-$('tabGames').onclick = () => setView('games'); $('tabStats').onclick = () => setView('stats'); $('tabTops').onclick = () => setView('tops');
-setView(['#stats','#tops'].includes(location.hash) ? location.hash.slice(1) : 'games');
+$('tabGames').onclick = () => setView('games'); $('tabStats').onclick = () => setView('stats'); $('tabTops').onclick = () => setView('tops'); $('tabTiers').onclick = () => setView('tiers');
+setView(['#stats','#tops','#tiers'].includes(location.hash) ? location.hash.slice(1) : 'games');
 initAuth().catch(() => {}).then(load);
 </script>
 </body>
