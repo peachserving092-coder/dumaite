@@ -229,6 +229,7 @@ input[type=range]{width:100%;accent-color:var(--c)}
     <select id="fStatus" aria-label="Статус"></select>
     <select id="fCat" aria-label="Категория"></select>
     <select id="hideSt" aria-label="Скрыть статус"></select>
+    <select id="fGenre" aria-label="Жанр"></select>
     <select id="fStudio" aria-label="Студия"></select>
     <select id="fFranchise" aria-label="Франшиза"></select>
     <button class="btn" id="missBtn" aria-pressed="false" hidden>⚠ Показать недоработки</button>
@@ -255,7 +256,7 @@ input[type=range]{width:100%;accent-color:var(--c)}
   <div id="viewTiers" hidden></div>
 </div>
 
-<datalist id="dlStudio"></datalist><datalist id="dlFranchise"></datalist>
+<datalist id="dlStudio"></datalist><datalist id="dlFranchise"></datalist><datalist id="dlGenre"></datalist>
 <dialog id="loginDlg"><div class="lg">
   <h2>Вход владельца</h2>
   <label class="f">Пароль<input class="in" id="lgPass" type="password" autocomplete="current-password"></label>
@@ -281,6 +282,7 @@ const CONFIG = {
 /* ============ СЛОЙ ДАННЫХ ============
    Таблицы: games и tops (см. supabase.sql). Если Supabase не настроен — localStorage.
    ratings: оценки 0–10; любая из четырёх (story, gameplay, sound, visual) может быть null — критерий не оценён.
+   genres: ['строки'] — свободные теги жанров.
    У игры есть categories: ['cinema' | 'walking' | 'vn'] (интерактивное кино, симулятор ходьбы, визуальные новеллы).
    Топы: loved (до 100), hated (до 50), cat_best (до 25) и cat_worst (до 10): общий топ игр с любой из трёх
    категорий. Везде массивы id игр по порядку. */
@@ -289,12 +291,12 @@ const sb = (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY && window.supabase)
 const ok = r => { if(r.error) throw new Error(r.error.message); return r.data; };
 const fromRow = r => ({
   id: r.id, title: r.title, year: r.year ?? '', studios: r.studios || [], franchises: r.franchises || [],
-  statuses: r.statuses || [], categories: r.categories || [], cover: r.cover || '', rated: r.rated !== false, ratings: r.ratings || {},
+  statuses: r.statuses || [], categories: r.categories || [], genres: r.genres || [], cover: r.cover || '', rated: r.rated !== false, ratings: r.ratings || {},
   pros: r.pros || [], cons: r.cons || [], review: r.review || '', createdAt: Date.parse(r.created_at) || 0
 });
 const toRow = g => ({
   id: g.id, title: g.title, year: g.year ? Number(g.year) : null, studios: g.studios || [], franchises: g.franchises || [],
-  statuses: g.statuses || [], categories: g.categories || [], cover: g.cover || null, rated: g.rated !== false, ratings: g.ratings || {},
+  statuses: g.statuses || [], categories: g.categories || [], genres: g.genres || [], cover: g.cover || null, rated: g.rated !== false, ratings: g.ratings || {},
   pros: g.pros || [], cons: g.cons || [], review: g.review || '', created_at: new Date(g.createdAt || Date.now()).toISOString()
 });
 
@@ -356,7 +358,7 @@ const rv = (g,k) => { const v = g.ratings?.[k]; return (v === null || v === unde
 const critVal = (g,k) => !g.rated ? null : (k === 'game' ? total(g) : rv(g,k));
 const critRow = (g,c) => { const v = rv(g,c.key); return `<div class="row"><span>${c.label}</span><div class="track"><div class="fill" style="width:${(v ?? 0)*10}%;background:${c.color}"></div></div><b>${v === null ? '—' : fmt(v)}</b></div>`; };
 const STATUSES = ['Играю','Скорые планы','Дальние планы','Пройдено','Брошено','Отложено','Заморожено'];
-const norm = g => ({...g, statuses: g.statuses || [], categories: g.categories || [], rated: g.rated !== false, studios: g.studios || (g.studio ? [g.studio] : []), franchises: g.franchises || (g.franchise ? [g.franchise] : [])});
+const norm = g => ({...g, statuses: g.statuses || [], categories: g.categories || [], genres: g.genres || [], rated: g.rated !== false, studios: g.studios || (g.studio ? [g.studio] : []), franchises: g.franchises || (g.franchise ? [g.franchise] : [])});
 const fmt = n => (Math.round(n * 10) / 10).toFixed(1);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
@@ -761,11 +763,11 @@ const cmpCrit = (key, rev) => (a,b) => {
 function cmpYear(dir){ return (a,b) => { const x=yr(a), y=yr(b); if(x===null&&y===null) return 0; if(x===null) return 1; if(y===null) return -1; return dir*(x-y) || a.title.localeCompare(b.title,'ru'); }; }
 
 function render(){
-  renderHidden(); fillMiss(); fillFilter('fStudio','studios','Все студии'); fillFilter('fFranchise','franchises','Все франшизы');
-  const q = $('q').value.trim().toLowerCase(), sort = $('sort').value, fs = $('fStudio').value, ff = $('fFranchise').value, st = $('fStatus').value, ct = $('fCat').value, yf = parseInt($('yFrom').value) || null, yt = parseInt($('yTo').value) || null, ms = isOwner ? $('fMiss').value : '';
+  renderHidden(); fillMiss(); fillFilter('fGenre','genres','Все жанры'); fillFilter('fStudio','studios','Все студии'); fillFilter('fFranchise','franchises','Все франшизы');
+  const q = $('q').value.trim().toLowerCase(), sort = $('sort').value, fs = $('fStudio').value, ff = $('fFranchise').value, st = $('fStatus').value, ct = $('fCat').value, yf = parseInt($('yFrom').value) || null, yt = parseInt($('yTo').value) || null, ms = isOwner ? $('fMiss').value : '', gn = $('fGenre').value;
   let items = games.filter(g =>
-    (!q || [g.title,...g.studios,...g.franchises].some(v => (v||'').toLowerCase().includes(q))) &&
-    (!st || g.statuses.includes(st)) && (!ct || g.categories.includes(ct)) && (!yf || (yr(g) !== null && yr(g) >= yf)) && (!yt || (yr(g) !== null && yr(g) <= yt)) && (!fs || g.studios.includes(fs)) && (!ff || g.franchises.includes(ff)) && (!ms || hasMiss(g, ms)) && !isHiddenBySt(g));
+    (!q || [g.title,...g.studios,...g.franchises,...g.genres].some(v => (v||'').toLowerCase().includes(q))) &&
+    (!st || g.statuses.includes(st)) && (!ct || g.categories.includes(ct)) && (!yf || (yr(g) !== null && yr(g) >= yf)) && (!yt || (yr(g) !== null && yr(g) <= yt)) && (!fs || g.studios.includes(fs)) && (!ff || g.franchises.includes(ff)) && (!ms || hasMiss(g, ms)) && (!gn || g.genres.includes(gn)) && !isHiddenBySt(g));
   const sorters = {
     new:(a,b)=> sortRev ? (a.createdAt||0)-(b.createdAt||0) : (b.createdAt||0)-(a.createdAt||0),
     total:cmpCrit('game',sortRev), story:cmpCrit('story',sortRev), gameplay:cmpCrit('gameplay',sortRev), sound:cmpCrit('sound',sortRev), visual:cmpCrit('visual',sortRev),
@@ -784,7 +786,7 @@ function render(){
       ${g.cover ? `<img class="cover" src="${esc(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="cover ph">${esc(g.title.charAt(0).toUpperCase())}</div>`}
       <div class="body">
         <div class="top">
-          <div><h3>${esc(g.title)}</h3><div class="meta">${[g.year, g.studios.join(', ')].filter(Boolean).map(esc).join(', ') || 'Без года и студии'}${g.franchises.length ? `<br>Франшиза: ${esc(g.franchises.join(', '))}` : ''}</div></div>
+          <div><h3>${esc(g.title)}</h3><div class="meta">${[g.year, g.studios.join(', ')].filter(Boolean).map(esc).join(', ') || 'Без года и студии'}${g.franchises.length ? `<br>Франшиза: ${esc(g.franchises.join(', '))}` : ''}${g.genres.length ? `<br>Жанр: ${esc(g.genres.join(', '))}` : ''}</div></div>
           <div class="total">${g.rated ? fmt(total(g)) : '—'}<small>${g.rated ? 'игра' : 'без оценки'}</small></div>
         </div>
         ${badges(g)}
@@ -811,7 +813,7 @@ function openView(g){
       ${g.cover ? `<img class="cover" src="${esc(g.cover)}" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cover ph',textContent:'?'}))">` : `<div class="cover ph">${esc(g.title.charAt(0).toUpperCase())}</div>`}
       <div class="body">
         <h2>${esc(g.title)}</h2>
-        <div class="meta muted">${[g.year, g.studios.join(', ')].filter(Boolean).map(esc).join(', ')}${g.franchises.length ? `<br>Франшиза: ${esc(g.franchises.join(', '))}` : ''}</div>
+        <div class="meta muted">${[g.year, g.studios.join(', ')].filter(Boolean).map(esc).join(', ')}${g.franchises.length ? `<br>Франшиза: ${esc(g.franchises.join(', '))}` : ''}${g.genres.length ? `<br>Жанр: ${esc(g.genres.join(', '))}` : ''}</div>
         ${badges(g)}
         ${g.rated ? `<div class="total" style="text-align:left">${fmt(total(g))}<small>игра в целом</small></div>` : ''}
       </div>
@@ -849,7 +851,7 @@ function makeChips(id, initial, listId, label){
 }
 
 function openForm(game){
-  const g = game || {id:null,title:'',year:'',statuses:[],categories:[],rated:true,studios:[],franchises:[],review:'',pros:[],cons:[],ratings:{}};
+  const g = game || {id:null,title:'',year:'',statuses:[],categories:[],genres:[],rated:true,studios:[],franchises:[],review:'',pros:[],cons:[],ratings:{}};
   const form = $('form');
   form.innerHTML = `
     <h2>${game ? 'Оценка игры' : 'Новая игра'}</h2>
@@ -861,6 +863,7 @@ function openForm(game){
       <div class="f">Студии<div class="chips" id="ch_studios"></div></div>
       <div class="f">Франшизы<div class="chips" id="ch_franchises"></div></div>
     </div>
+    <div class="f">Жанры<div class="chips" id="ch_genres"></div></div>
     <fieldset class="stf"><legend>Статусы</legend><div class="sts pick">${STATUSES.map(x => `<label class="pill"><input type="checkbox" value="${esc(x)}" ${(g.statuses||[]).includes(x) ? 'checked' : ''}><span>${esc(x)}</span></label>`).join('')}</div></fieldset>
     <fieldset class="stf"><legend>Категории</legend><div class="sts pickc">${CATEGORIES.map(c => `<label class="pill"><input type="checkbox" value="${c.id}" ${(g.categories||[]).includes(c.id) ? 'checked' : ''}><span>${esc(c.label)}</span></label>`).join('')}</div></fieldset>
     <label class="f">Ссылка на обложку<input class="in" id="f_cover" type="url" placeholder="https://..." value="${esc(g.cover)}"></label>
@@ -888,9 +891,10 @@ function openForm(game){
   CRITERIA.forEach(c => { $('r_'+c.key).oninput = upd; if(c.key !== 'game') $('s_'+c.key).onchange = upd; }); upd();
   const syncRated = () => $('ratebox').hidden = !$('f_rated').checked; $('f_rated').onchange = syncRated; syncRated();
   const fillList = (id,key) => $(id).innerHTML = [...new Set(games.flatMap(x => x[key]).filter(Boolean))].map(v => `<option value="${esc(v)}">`).join('');
-  fillList('dlStudio','studios'); fillList('dlFranchise','franchises');
+  fillList('dlStudio','studios'); fillList('dlFranchise','franchises'); fillList('dlGenre','genres');
   const getStudios = makeChips('ch_studios', g.studios || [], 'dlStudio', 'Студия');
   const getFranchises = makeChips('ch_franchises', g.franchises || [], 'dlFranchise', 'Франшиза');
+  const getGenres = makeChips('ch_genres', g.genres || [], 'dlGenre', 'Жанр');
   const prev = $('prev'), cov = $('f_cover');
   const showPrev = () => { const u = cov.value.trim(); if(u){ prev.src = u; } else { prev.hidden = true; prev.removeAttribute('src'); } };
   prev.onload = () => prev.hidden = false; prev.onerror = () => prev.hidden = true;
@@ -910,7 +914,7 @@ function openForm(game){
     const ratings = {}; CRITERIA.forEach(c => ratings[c.key] = (c.key !== 'game' && $('s_'+c.key).checked) ? null : Number($('r_'+c.key).value));
     const out = {
       id: g.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
-      title, year: $('f_year').value, studios: getStudios(), franchises: getFranchises(), cover: $('f_cover').value.trim(),
+      title, year: $('f_year').value, studios: getStudios(), franchises: getFranchises(), genres: getGenres(), cover: $('f_cover').value.trim(),
       rated: $('f_rated').checked, statuses: [...document.querySelectorAll('#form .pick input:checked')].map(i => i.value), categories: [...document.querySelectorAll('#form .pickc input:checked')].map(i => i.value),
       review: $('f_review').value.trim(), pros: lines($('f_pros').value), cons: lines($('f_cons').value),
       ratings, createdAt: g.createdAt || Date.now()
@@ -970,7 +974,7 @@ $('file').onchange = async e => {
   e.target.value = '';
 };
 $('fStatus').innerHTML = '<option value="">Все статусы</option>' + STATUSES.map(x => `<option>${esc(x)}</option>`).join('');
-$('fStatus').onchange = render; $('fCat').onchange = render; $('fMiss').onchange = render;
+$('fStatus').onchange = render; $('fCat').onchange = render; $('fMiss').onchange = render; $('fGenre').onchange = render;
 $('hideSt').onchange = () => { const v = $('hideSt').value; if(v){ hiddenSt.add(v); saveHidden(); } render(); };
 $('hiddenChips').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if(b){ hiddenSt.delete(b.dataset.s); saveHidden(); render(); } });
 $('missBtn').onclick = () => { $('fMiss').value = $('fMiss').value ? '' : 'any'; render(); };
